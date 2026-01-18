@@ -60,6 +60,37 @@ The RLM workflow will then:
 - Delegate chunk analysis to the sub-LLM
 - Synthesize results in the main conversation
 
+## Working with Long Files
+
+When using RLM to process large context files, it is recommended to save them in a dedicated `context/` folder within this project directory. This keeps your working files organized and separate from the RLM implementation code.
+
+```bash
+mkdir context
+# Place your large documents here, e.g.:
+# context/my_large_document.txt
+# context/codebase_dump.py
+```
+
+## Security Warning
+
+**This project is not intended for production use.**
+
+If you plan to run Claude Code in `--dangerously-skip-permissions` mode:
+
+1. **Ensure your setup is correct** - Verify all file paths and configurations before enabling this mode
+2. **Run in an isolated folder** - Never run with skipped permissions in directories containing sensitive data, credentials, or system files
+3. **Understand the risks** - This mode allows Claude to execute commands without confirmation prompts, which can lead to unintended file modifications or deletions
+
+**Recommended**: Create a dedicated, isolated working directory specifically for RLM tasks when using dangerous mode:
+
+```bash
+# Example: Create an isolated workspace
+mkdir ~/rlm-workspace
+cd ~/rlm-workspace
+git clone https://github.com/Brainqub3/claude_code_RLM.git
+cd claude_code_RLM
+```
+
 ## Repository Structure
 
 ```
@@ -73,6 +104,7 @@ The RLM workflow will then:
 │           ├── SKILL.md              # RLM skill definition
 │           └── scripts/
 │               └── rlm_repl.py       # Persistent Python REPL
+├── context/                           # Recommended location for large context files
 └── README.md
 ```
 
