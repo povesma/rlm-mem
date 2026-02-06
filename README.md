@@ -10,6 +10,39 @@ RLM-Mem provides a complete workflow for working with large codebases (1000+ fil
 - **Claude-Mem**: Provides semantic memory of past decisions, PRDs, implementations, and lessons learned
 - **12 Commands**: Cover the complete development lifecycle from planning to deployment
 
+### How It Works
+
+```mermaid
+graph TD
+    A[User invokes /rlm-mem command] --> B[Claude Code loads command prompt]
+    B --> C[Opus orchestrates workflow]
+
+    C --> D[RLM REPL Analysis]
+    C --> E[Claude-Mem Queries]
+    C --> F[Haiku Subagent]
+
+    D --> G[python3 rlm_repl.py]
+    G --> H[Index 3,940+ files]
+    H --> I[Detect languages, patterns]
+    I --> J[Store in .pkl state]
+
+    E --> K[Search past work]
+    E --> L[Save new observations]
+    K --> M[Retrieve PRDs, designs, lessons]
+    L --> N[Store decisions, outcomes]
+
+    F --> O[Analyze code chunks]
+    O --> P[Extract patterns, dependencies]
+    P --> Q[Return JSON with evidence]
+
+    J --> R[Combined Intelligence]
+    M --> R
+    N --> R
+    Q --> R
+
+    R --> S[Better Decisions: Context-aware, Pattern-consistent, Data-driven]
+```
+
 ### Key Benefits
 
 - **30-40% fewer bugs** through pattern consistency
@@ -29,13 +62,11 @@ RLM-Mem provides a complete workflow for working with large codebases (1000+ fil
    - macOS: Pre-installed or via Homebrew
    - Windows: Download from python.org
 
-3. **Git repository** - Your code must be in a git repo
+3. **Claude-Mem plugin** - For semantic memory
+   - Install in Claude Code: `/plugin marketplace add thedotmack/claude-mem` then `/plugin install claude-mem`
+   - Repository: https://github.com/thedotmack/claude-mem
 
-### Optional but Recommended
-
-4. **Claude-Mem plugin** - For semantic memory features
-   - Install separately (see Claude Code plugin docs)
-   - Not required but enhances functionality
+4. **Git repository** - Your code must be in a git repo
 
 ## 🚀 Installation
 
@@ -146,7 +177,7 @@ This will:
 - Index all files in your repository
 - Detect languages and file types
 - Create `.claude/rlm_state/` directory
-- Bootstrap claude-mem (if available)
+- Bootstrap claude-mem with project knowledge
 
 **First-time initialization takes 30-60 seconds for large repos.**
 
