@@ -1,268 +1,3 @@
-Below is a minimal way to turn Claude Code into an RLM-style workflow using only CLAUDE.md + a Skill + a subagent, plus a tiny persistent REPL script.
-
-This mirrors the core RLM pattern from the paper: a model that works inside a REPL where a large context lives outside the chat, and the model can call a smaller “sub-LM” (llm_query) on chunks. In the paper’s RLM-with-REPL setup, the REPL is initialised with a context variable and a llm_query function for sub-calls. We will map llm_query to a Claude Code subagent handoff. 
-
-2512.24601v1
-
-2512.24601v1
-
- 
-
-2512.24601v1
-
-Conceptual mapping: RLM → Claude Code primitives
-
-RLM paper components
-
-Persistent REPL holding a huge context
-
-llm_query(...) subcalls to a sub-model for chunk-level reasoning
-
-2512.24601v1
-
-Claude Code equivalents
-
-CLAUDE.md (project memory / “system-ish” instructions) controls default behaviour and can be modularised via .claude/rules/ if you want later
-
-Skill (.claude/skills/rlm/SKILL.md) loads the RLM operating procedure only when needed (or when you run /rlm)
-
-Subagent (.claude/agents/rlm-subcall.md) plays the role of the “sub-LM” for llm_query style calls
-
-Persistent REPL script (a tiny Python tool) stores state to disk so the “REPL” survives across tool calls, similar to the repo’s “persistent REPL” feature goal
-
-Also note: Claude Code subagents run in their own context and cannot spawn other subagents, so the recursion/orchestration stays in the main session (which matches your “depth 1 handoff” requirement).
-
-Quick install options
-
-You can install this per project (recommended if you want it versioned and shared), or personally (available across projects):
-
-Project scope
-
-Skills: .claude/skills/...
-
-Subagents: .claude/agents/...
-
-Project memory: ./CLAUDE.md or ./.claude/CLAUDE.md
-
-Personal scope
-
-Skills: ~/.claude/skills/...
-
-Subagents: ~/.claude/agents/...
-
-User memory: ~/.claude/CLAUDE.md
-
-Download a ready scaffold
-
-I built a minimal scaffold you can drop into a repo:
-
-Download the Claude Code RLM scaffold zip
-
-It includes:
-
-CLAUDE.md
-
-.claude/skills/rlm/SKILL.md
-
-.claude/skills/rlm/scripts/rlm_repl.py
-
-.claude/agents/rlm-subcall.md
-
-Manual setup (copy/paste)
-
-From your repo root:
-
-mkdir -p .claude/skills/rlm/scripts .claude/agents
-mkdir -p .claude/rlm_state
-
-
-Add to .gitignore:
-
-# RLM state (persistent REPL)
-.claude/rlm_state/
-
-1) CLAUDE.md
-
-Create CLAUDE.md (or .claude/CLAUDE.md if you prefer) so Claude always knows the RLM capability exists:
-
-# Project instructions
-
-## RLM mode for long-context tasks
-
-This repository includes a minimal "Recursive Language Model" (RLM) setup for Claude Code:
-- Skill: `rlm` in `.claude/skills/rlm/`
-- Subagent (sub-LLM): `rlm-subcall` in `.claude/agents/`
-- Persistent Python REPL: `.claude/skills/rlm/scripts/rlm_repl.py`
-
-When the user needs you to work over a context that is too large to paste into chat:
-1) Ask for (or locate) a context file path.
-2) Run the `/rlm` Skill and follow its procedure.
-
-Keep the main conversation light: use the REPL and subagent to do chunk-level work, then synthesise.
-
-
-Claude Code loads project memory files automatically, and supports a hierarchy (enterprise, project, rules, user, local).
-
-2) Skill: .claude/skills/rlm/SKILL.md
----
-name: rlm
-description: Run a Recursive Language Model-style loop for long-context tasks. Uses a persistent local Python REPL and an rlm-subcall subagent as the sub-LLM (llm_query).
-allowed-tools:
-  - Read
-  - Write
-  - Edit
-  - Grep
-  - Glob
-  - Bash
----
-
-# rlm (Recursive Language Model workflow)
-
-Use this Skill when:
-- The user provides (or references) a very large context file (docs, logs, transcripts, scraped webpages) that won't fit comfortably in chat context.
-- You need to iteratively inspect, search, chunk, and extract information from that context.
-- You can delegate chunk-level analysis to a subagent.
-
-## Mental model
-
-- Main Claude Code conversation = the root LM.
-- Persistent Python REPL (`rlm_repl.py`) = the external environment.
-- Subagent `rlm-subcall` = the sub-LM used like `llm_query`.
-
-## How to run
-
-### Inputs
-
-This Skill reads `$ARGUMENTS`. Accept these patterns:
-- `context=<path>` (required): path to the file containing the large context.
-- `query=<question>` (required): what the user wants.
-- Optional: `chunk_chars=<int>` (default ~200000) and `overlap_chars=<int>` (default 0).
-
-If the user didn't supply arguments, ask for:
-1) the context file path, and
-2) the query.
-
-### Step-by-step procedure
-
-1. Initialise the REPL state
-   ```bash
-   python3 .claude/skills/rlm/scripts/rlm_repl.py init <context_path>
-   python3 .claude/skills/rlm/scripts/rlm_repl.py status
-
-
-Scout the context quickly
-
-python3 .claude/skills/rlm/scripts/rlm_repl.py exec -c "print(peek(0, 3000))"
-python3 .claude/skills/rlm/scripts/rlm_repl.py exec -c "print(peek(len(content)-3000, len(content)))"
-
-
-Choose a chunking strategy
-
-Prefer semantic chunking if the format is clear (markdown headings, JSON objects, log timestamps).
-
-Otherwise, chunk by characters (size around chunk_chars, optional overlap).
-
-Materialise chunks as files (so subagents can read them)
-
-python3 .claude/skills/rlm/scripts/rlm_repl.py exec <<'PY'
-paths = write_chunks('.claude/rlm_state/chunks', size=200000, overlap=0)
-print(len(paths))
-print(paths[:5])
-PY
-
-
-Subcall loop (delegate to rlm-subcall)
-
-For each chunk file, invoke the rlm-subcall subagent with:
-
-the user query,
-
-the chunk file path,
-
-and any specific extraction instructions.
-
-Keep subagent outputs compact and structured (JSON preferred).
-
-Append each subagent result to buffers (either manually in chat, or by pasting into a REPL add_buffer(...) call).
-
-Synthesis
-
-Once enough evidence is collected, synthesise the final answer in the main conversation.
-
-Optionally ask rlm-subcall once more to merge the collected buffers into a coherent draft.
-
-Guardrails
-
-Do not paste large raw chunks into the main chat context.
-
-Use the REPL to locate exact excerpts; quote only what you need.
-
-Subagents cannot spawn other subagents. Any orchestration stays in the main conversation.
-
-Keep scratch/state files under .claude/rlm_state/.
-
-
-Skills live in `.claude/skills/` (project) or `~/.claude/skills/` (personal), are activated based on their description, and are loaded when created/modified. :contentReference[oaicite:16]{index=16}
-
-### 3) Subagent: `.claude/agents/rlm-subcall.md`
-
-```md
----
-name: rlm-subcall
-description: Acts as the RLM sub-LLM (llm_query). Given a chunk of context (usually via a file path) and a query, extract only what is relevant and return a compact structured result. Use proactively for long contexts.
-tools: Read
-model: haiku
-permissionMode: plan
----
-
-You are a sub-LLM used inside a Recursive Language Model (RLM) loop.
-
-## Task
-You will receive:
-- A user query
-- Either:
-  - A file path to a chunk of a larger context file, or
-  - A raw chunk of text
-
-Your job is to extract information relevant to the query from only the provided chunk.
-
-## Output format
-Return JSON only with this schema:
-
-```json
-{
-  "chunk_id": "...",
-  "relevant": [
-    {
-      "point": "...",
-      "evidence": "short quote or paraphrase with approximate location",
-      "confidence": "high|medium|low"
-    }
-  ],
-  "missing": ["what you could not determine from this chunk"],
-  "suggested_next_queries": ["optional sub-questions for other chunks"],
-  "answer_if_complete": "If this chunk alone answers the user's query, put the answer here, otherwise null"
-}
-
-Rules
-
-Do not speculate beyond the chunk.
-
-Keep evidence short (aim < 25 words per evidence field).
-
-If you are given a file path, read it with the Read tool.
-
-If the chunk is clearly irrelevant, return an empty relevant list and explain briefly in missing.
-
-
-Subagents are markdown files with YAML frontmatter and live in `.claude/agents/` (project) or `~/.claude/agents/` (personal). :contentReference[oaicite:17]{index=17}  
-You can pick `model: haiku|sonnet|opus|inherit`. :contentReference[oaicite:18]{index=18}
-
-### 4) Persistent REPL: `.claude/skills/rlm/scripts/rlm_repl.py`
-
-Use the script from the scaffold zip, or copy this file verbatim:
-
-```python
 #!/usr/bin/env python3
 """Persistent mini-REPL for RLM-style workflows in Claude Code.
 
@@ -272,6 +7,8 @@ saving a pickle file to disk. It is intentionally small and dependency-free.
 Typical flow:
   1) Initialise context:
        python rlm_repl.py init path/to/context.txt
+  OR for code repositories:
+       python rlm_repl.py init-repo /path/to/repo
   2) Execute code repeatedly (state persists):
        python rlm_repl.py exec -c 'print(len(content))'
        python rlm_repl.py exec <<'PYCODE'
@@ -284,6 +21,7 @@ The script injects these variables into the exec environment:
   - context: dict with keys {path, loaded_at, content}
   - content: string alias for context['content']
   - buffers: list[str] for storing intermediate text results
+  - repo_index: dict with file index (when using init-repo)
 
 It also injects helpers:
   - peek(start=0, end=1000) -> str
@@ -300,20 +38,170 @@ from __future__ import annotations
 
 import argparse
 import io
+import json
+import mimetypes
 import os
 import pickle
 import re
+import subprocess
 import sys
 import textwrap
 import time
 import traceback
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Set, Optional
 
 
 DEFAULT_STATE_PATH = Path(".claude/rlm_state/state.pkl")
 DEFAULT_MAX_OUTPUT_CHARS = 8000
+
+# Language detection by file extension
+LANGUAGE_MAP = {
+    # Programming languages
+    '.py': 'Python',
+    '.pyx': 'Python',
+    '.pyi': 'Python',
+    '.js': 'JavaScript',
+    '.jsx': 'JavaScript',
+    '.ts': 'TypeScript',
+    '.tsx': 'TypeScript',
+    '.java': 'Java',
+    '.kt': 'Kotlin',
+    '.cpp': 'C++',
+    '.cc': 'C++',
+    '.cxx': 'C++',
+    '.c': 'C',
+    '.h': 'C/C++',
+    '.hpp': 'C++',
+    '.cs': 'C#',
+    '.go': 'Go',
+    '.rs': 'Rust',
+    '.rb': 'Ruby',
+    '.php': 'PHP',
+    '.swift': 'Swift',
+    '.m': 'Objective-C',
+    '.mm': 'Objective-C++',
+    '.scala': 'Scala',
+    '.r': 'R',
+    '.R': 'R',
+    '.lua': 'Lua',
+    '.perl': 'Perl',
+    '.pl': 'Perl',
+    '.sh': 'Shell',
+    '.bash': 'Bash',
+    '.zsh': 'Zsh',
+    '.fish': 'Fish',
+    '.vim': 'VimScript',
+    '.el': 'Emacs Lisp',
+    '.clj': 'Clojure',
+    '.cljs': 'ClojureScript',
+    '.ex': 'Elixir',
+    '.exs': 'Elixir',
+    '.erl': 'Erlang',
+    '.hrl': 'Erlang',
+    '.ml': 'OCaml',
+    '.mli': 'OCaml',
+    '.hs': 'Haskell',
+    '.lhs': 'Haskell',
+    '.dart': 'Dart',
+    '.v': 'Verilog',
+    '.vhd': 'VHDL',
+    '.vhdl': 'VHDL',
+    '.sql': 'SQL',
+    '.asm': 'Assembly',
+    '.s': 'Assembly',
+    '.S': 'Assembly',
+
+    # Web/markup
+    '.html': 'HTML',
+    '.htm': 'HTML',
+    '.xml': 'XML',
+    '.svg': 'SVG',
+    '.css': 'CSS',
+    '.scss': 'SCSS',
+    '.sass': 'Sass',
+    '.less': 'Less',
+
+    # Documentation
+    '.md': 'Markdown',
+    '.markdown': 'Markdown',
+    '.rst': 'ReStructuredText',
+    '.txt': 'Text',
+    '.tex': 'LaTeX',
+    '.adoc': 'AsciiDoc',
+
+    # Data/config
+    '.json': 'JSON',
+    '.yaml': 'YAML',
+    '.yml': 'YAML',
+    '.toml': 'TOML',
+    '.ini': 'INI',
+    '.cfg': 'Config',
+    '.conf': 'Config',
+    '.xml': 'XML',
+    '.csv': 'CSV',
+    '.tsv': 'TSV',
+
+    # Build/project files
+    '.cmake': 'CMake',
+    '.gradle': 'Gradle',
+    '.make': 'Makefile',
+    '.dockerfile': 'Dockerfile',
+
+    # Binary/compiled (common ones)
+    '.pyc': 'Python Bytecode',
+    '.pyo': 'Python Bytecode',
+    '.so': 'Shared Library',
+    '.dll': 'Dynamic Library',
+    '.dylib': 'Dynamic Library',
+    '.a': 'Static Library',
+    '.o': 'Object File',
+    '.obj': 'Object File',
+    '.exe': 'Executable',
+    '.bin': 'Binary',
+    '.class': 'Java Bytecode',
+    '.jar': 'Java Archive',
+    '.war': 'Web Archive',
+
+    # Images
+    '.png': 'PNG Image',
+    '.jpg': 'JPEG Image',
+    '.jpeg': 'JPEG Image',
+    '.gif': 'GIF Image',
+    '.bmp': 'BMP Image',
+    '.ico': 'Icon',
+    '.webp': 'WebP Image',
+
+    # Archives
+    '.zip': 'ZIP Archive',
+    '.tar': 'TAR Archive',
+    '.gz': 'Gzip Archive',
+    '.bz2': 'Bzip2 Archive',
+    '.xz': 'XZ Archive',
+    '.7z': '7-Zip Archive',
+
+    # Media
+    '.mp3': 'Audio',
+    '.wav': 'Audio',
+    '.mp4': 'Video',
+    '.avi': 'Video',
+    '.mov': 'Video',
+    '.pdf': 'PDF',
+}
+
+# Binary file extensions
+BINARY_EXTENSIONS = {
+    '.pyc', '.pyo', '.so', '.dll', '.dylib', '.a', '.o', '.obj',
+    '.exe', '.bin', '.class', '.jar', '.war',
+    '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.ico', '.webp', '.svg',
+    '.zip', '.tar', '.gz', '.bz2', '.xz', '.7z', '.rar',
+    '.mp3', '.wav', '.ogg', '.flac', '.aac',
+    '.mp4', '.avi', '.mov', '.mkv', '.wmv', '.flv',
+    '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
+    '.ttf', '.otf', '.woff', '.woff2', '.eot',
+    '.db', '.sqlite', '.sqlite3',
+}
 
 
 class RlmReplError(RuntimeError):
@@ -382,6 +270,154 @@ def _filter_pickleable(d: Dict[str, Any]) -> Tuple[Dict[str, Any], List[str]]:
         else:
             dropped.append(k)
     return kept, dropped
+
+
+# Repository-specific helpers
+
+def _detect_language(file_path: Path) -> str:
+    """Detect language/type from file extension."""
+    # Handle special cases
+    if file_path.name.lower() in {'makefile', 'gnumakefile', 'dockerfile'}:
+        name_lower = file_path.name.lower()
+        if 'makefile' in name_lower:
+            return 'Makefile'
+        if 'dockerfile' in name_lower:
+            return 'Dockerfile'
+
+    # Check extension
+    ext = file_path.suffix.lower()
+    if ext in LANGUAGE_MAP:
+        return LANGUAGE_MAP[ext]
+
+    # Default to unknown
+    return 'Unknown'
+
+
+def _is_binary_file(file_path: Path) -> bool:
+    """Check if a file is binary."""
+    # Check by extension first
+    ext = file_path.suffix.lower()
+    if ext in BINARY_EXTENSIONS:
+        return True
+
+    # For files without recognized extensions, check content
+    if not file_path.exists() or file_path.is_dir():
+        return False
+
+    try:
+        # Read first 8KB and check for null bytes
+        with file_path.open('rb') as f:
+            chunk = f.read(8192)
+            if not chunk:  # Empty file
+                return False
+            # If there are null bytes, it's likely binary
+            return b'\x00' in chunk
+    except (OSError, PermissionError):
+        # If we can't read it, assume binary
+        return True
+
+
+def _discover_git_files(repo_root: Path) -> List[Path]:
+    """Use git to discover all tracked and untracked files (respects .gitignore)."""
+    try:
+        # Get tracked files
+        result = subprocess.run(
+            ['git', 'ls-files'],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        tracked = set(result.stdout.strip().split('\n')) if result.stdout.strip() else set()
+
+        # Get untracked files (excluding ignored)
+        result = subprocess.run(
+            ['git', 'ls-files', '--others', '--exclude-standard'],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        untracked = set(result.stdout.strip().split('\n')) if result.stdout.strip() else set()
+
+        all_files = tracked | untracked
+        return [repo_root / f for f in sorted(all_files) if f]
+
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        # Git not available or not a git repo, fall back to walking directory
+        return _discover_files_fallback(repo_root)
+
+
+def _discover_files_fallback(repo_root: Path) -> List[Path]:
+    """Fallback file discovery when git is not available."""
+    files = []
+    # Common directories to skip
+    skip_dirs = {
+        '.git', '.svn', '.hg', '__pycache__', 'node_modules',
+        'venv', 'env', '.env', 'build', 'dist', '.idea',
+        '.vscode', 'target', 'bin', 'obj'
+    }
+
+    for item in repo_root.rglob('*'):
+        # Skip if any parent is in skip_dirs
+        if any(part in skip_dirs for part in item.parts):
+            continue
+        if item.is_file():
+            files.append(item)
+
+    return sorted(files)
+
+
+def _build_repo_index(repo_root: Path, max_file_size_mb: int = 10) -> Dict[str, Any]:
+    """Build an index of all files in the repository."""
+    repo_root = repo_root.resolve()
+    files = _discover_git_files(repo_root)
+
+    index = {
+        'repo_root': str(repo_root),
+        'indexed_at': time.time(),
+        'total_files': 0,
+        'total_size': 0,
+        'files': {},
+        'languages': {},
+    }
+
+    max_size_bytes = max_file_size_mb * 1024 * 1024
+
+    for file_path in files:
+        if not file_path.exists():
+            continue
+
+        try:
+            rel_path = str(file_path.relative_to(repo_root))
+            size = file_path.stat().st_size
+            is_binary = _is_binary_file(file_path)
+            language = _detect_language(file_path)
+
+            # Store file metadata
+            index['files'][rel_path] = {
+                'size': size,
+                'is_binary': is_binary,
+                'lang': language,
+                'too_large': size > max_size_bytes,
+                'abs_path': str(file_path),
+            }
+
+            # Update statistics
+            index['total_files'] += 1
+            index['total_size'] += size
+
+            # Track language counts
+            if language not in index['languages']:
+                index['languages'][language] = {'count': 0, 'size': 0}
+            index['languages'][language]['count'] += 1
+            index['languages'][language]['size'] += size
+
+        except (OSError, PermissionError) as e:
+            # Skip files we can't access
+            continue
+
+    return index
 
 
 def _make_helpers(context_ref: Dict[str, Any], buffers_ref: List[str]):
@@ -476,11 +512,71 @@ def cmd_init(args: argparse.Namespace) -> int:
         },
         "buffers": [],
         "globals": {},
+        "repo_index": None,
     }
     _save_state(state, state_path)
 
     print(f"Initialised RLM REPL state at: {state_path}")
     print(f"Loaded context: {ctx_path} ({len(content):,} chars)")
+    return 0
+
+
+def cmd_init_repo(args: argparse.Namespace) -> int:
+    """Initialize state for a code repository."""
+    state_path = Path(args.state)
+    repo_path = Path(args.repo_path).resolve()
+
+    if not repo_path.exists():
+        raise RlmReplError(f"Repository path does not exist: {repo_path}")
+    if not repo_path.is_dir():
+        raise RlmReplError(f"Repository path is not a directory: {repo_path}")
+
+    print(f"Indexing repository: {repo_path}")
+    print("This may take a moment for large repositories...")
+
+    # Build file index
+    repo_index = _build_repo_index(repo_path, max_file_size_mb=args.max_file_size_mb)
+
+    # Create state
+    state: Dict[str, Any] = {
+        "version": 1,
+        "context": {
+            "path": str(repo_path),
+            "loaded_at": time.time(),
+            "content": "",  # Empty for repo mode
+        },
+        "buffers": [],
+        "globals": {},
+        "repo_index": repo_index,
+    }
+    _save_state(state, state_path)
+
+    # Print summary
+    total_files = repo_index['total_files']
+    total_size_mb = repo_index['total_size'] / (1024 * 1024)
+
+    print(f"\n✓ RLM initialized for repository: {repo_path}")
+    print(f"  - {total_files:,} files indexed")
+    print(f"  - Size: {total_size_mb:.1f} MB")
+
+    # Show top languages
+    langs = sorted(
+        repo_index['languages'].items(),
+        key=lambda x: x[1]['count'],
+        reverse=True
+    )
+    if langs:
+        print(f"  - Primary languages:")
+        for lang, stats in langs[:5]:
+            count = stats['count']
+            pct = (count / total_files * 100) if total_files > 0 else 0
+            print(f"    • {lang}: {count} files ({pct:.1f}%)")
+
+    print(f"  - State saved to: {state_path}")
+    print(f"\nNext steps:")
+    print(f"  python3 {sys.argv[0]} status  # View index status")
+    print(f"  python3 {sys.argv[0]} exec -c 'print(repo_index)' # Explore index")
+
     return 0
 
 
@@ -490,14 +586,35 @@ def cmd_status(args: argparse.Namespace) -> int:
     content = ctx.get("content", "")
     buffers = state.get("buffers", [])
     g = state.get("globals", {})
+    repo_index = state.get("repo_index")
 
     print("RLM REPL status")
     print(f"  State file: {args.state}")
     print(f"  Context path: {ctx.get('path')}")
-    print(f"  Context chars: {len(content):,}")
+
+    if repo_index:
+        # Repository mode
+        print(f"  Mode: Repository")
+        print(f"  Total files: {repo_index['total_files']:,}")
+        print(f"  Total size: {repo_index['total_size'] / (1024 * 1024):.1f} MB")
+        print(f"  Languages: {len(repo_index['languages'])}")
+        if args.show_vars:
+            langs = sorted(
+                repo_index['languages'].items(),
+                key=lambda x: x[1]['count'],
+                reverse=True
+            )
+            for lang, stats in langs[:10]:
+                print(f"    - {lang}: {stats['count']} files")
+    else:
+        # Single file mode
+        print(f"  Mode: Single file")
+        print(f"  Context chars: {len(content):,}")
+
     print(f"  Buffers: {len(buffers)}")
     print(f"  Persisted vars: {len(g)}")
     if args.show_vars and g:
+        print(f"  Variables:")
         for k in sorted(g.keys()):
             print(f"    - {k}")
     return 0
@@ -528,8 +645,8 @@ def cmd_exec(args: argparse.Namespace) -> int:
     state = _load_state(state_path)
 
     ctx = state.get("context")
-    if not isinstance(ctx, dict) or "content" not in ctx:
-        raise RlmReplError("State is missing a valid 'context'. Re-run init.")
+    if not isinstance(ctx, dict):
+        raise RlmReplError("State is missing a valid 'context'. Re-run init or init-repo.")
 
     buffers = state.setdefault("buffers", [])
     if not isinstance(buffers, list):
@@ -541,6 +658,8 @@ def cmd_exec(args: argparse.Namespace) -> int:
         persisted = {}
         state["globals"] = persisted
 
+    repo_index = state.get("repo_index")
+
     code = args.code
     if code is None:
         code = sys.stdin.read()
@@ -551,6 +670,8 @@ def cmd_exec(args: argparse.Namespace) -> int:
     env["context"] = ctx
     env["content"] = ctx.get("content", "")
     env["buffers"] = buffers
+    if repo_index:
+        env["repo_index"] = repo_index
 
     helpers = _make_helpers(ctx, buffers)
     env.update(helpers)
@@ -582,6 +703,7 @@ def cmd_exec(args: argparse.Namespace) -> int:
         "context",
         "content",
         "buffers",
+        "repo_index",
         *helpers.keys(),
     }
     to_persist = {k: v for k, v in env.items() if k not in injected_keys}
@@ -642,6 +764,22 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_init.set_defaults(func=cmd_init)
 
+    p_init_repo = sub.add_parser(
+        "init-repo",
+        help="Initialise state from a code repository (indexes all files)"
+    )
+    p_init_repo.add_argument(
+        "repo_path",
+        help="Path to the repository root directory"
+    )
+    p_init_repo.add_argument(
+        "--max-file-size-mb",
+        type=int,
+        default=10,
+        help="Mark files larger than this as 'too_large' (default: 10 MB)",
+    )
+    p_init_repo.set_defaults(func=cmd_init_repo)
+
     p_status = sub.add_parser("status", help="Show current state summary")
     p_status.add_argument(
         "--show-vars", action="store_true", help="List persisted variable names"
@@ -693,60 +831,3 @@ def main(argv: List[str]) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv[1:]))
-
-
-Make it executable:
-
-chmod +x .claude/skills/rlm/scripts/rlm_repl.py
-
-How you actually use it in Claude Code
-
-Put your long context in a file, for example big_context.txt.
-
-Start Claude Code in the repo:
-
-claude
-
-
-Run the skill:
-
-Type:
-/rlm context=big_context.txt query="Your question here"
-
-(Manual invocation of Skills uses /skill-name, and Skills are triggered based on the description when relevant.)
-
-When chunk files exist (for example under .claude/rlm_state/chunks/), you hand off chunk analysis:
-
-In chat, explicitly request the subagent:
-
-“Use the rlm-subcall subagent on chunk file .claude/rlm_state/chunks/chunk_0003.txt with query: …”
-
-Subagents are configured in .claude/agents/, and you can request a specific one explicitly.
-
-Practical RLM-style heuristics that matter
-
-The RLM paper calls out a very pragmatic point: if you are going to do lots of sub-calls, batch them rather than doing thousands of tiny calls. Their prompt guidance explicitly warns to batch llm_query calls and suggests chunking around 200k characters, and to use byte offsets for precise extraction. 
-
-2512.24601v1
-
-So, in Claude Code terms:
-
-Prefer chunk sizes on the order of ~100k to 300k chars per subagent call (tune to your needs).
-
-Avoid calling the subagent for every tiny span. First narrow with grep() and then chunk.
-
-Keep subagent outputs terse and structured, then synthesise in the main agent.
-
-Why this is “enough RLM” for what you asked
-
-The official alexzhang13/rlm repo highlights persistent REPLs plus subcalls like llm_query as key capabilities.
-
-The paper’s RLM-with-REPL pattern is: externalise huge context into a REPL variable and provide a subcall interface to a smaller model. 
-
-2512.24601v1
-
-2512.24601v1
-
-Claude Code already gives you (a) a controllable memory layer (CLAUDE.md), (b) a portable “procedure” layer (Skills), and (c) separate-context assistants (subagents).
-
-This setup gives you the minimal REPL + sub-LLM handoff loop without trying to reproduce the whole repo’s sandboxing, sockets, async batching, etc.

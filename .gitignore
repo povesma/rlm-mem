@@ -1,2 +1,33 @@
-# RLM state (persistent REPL)
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# RLM state (don't commit state files)
 .claude/rlm_state/
+*.pkl
+
+# Logs
+*.log
