@@ -68,6 +68,15 @@ graph TD
 
 4. **Git repository** - Your code must be in a git repo
 
+### Nice to Have
+
+5. **Frontend Design Plugin** - For UI/UX design work
+   - Install: `/plugin marketplace add anthropics/claude-code` then `/plugin install frontend-design@claude-code-plugins`
+
+6. **Context7 MCP Server** - For library documentation lookups (no authentication required)
+   - Per-project: `claude mcp add --transport http context7 https://mcp.context7.com/mcp`
+   - All projects: `claude mcp add --transport http --scope user context7 https://mcp.context7.com/mcp`
+
 ## 🚀 Installation
 
 ### macOS Installation
