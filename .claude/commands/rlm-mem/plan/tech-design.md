@@ -91,7 +91,37 @@ Extract:
 - Patterns that worked well
 - Patterns that caused problems
 
-### Step 5: Synthesize Technical Design
+### Step 5: Ask Technical Clarifying Questions (MANDATORY)
+
+**🚨 BEFORE writing the technical design, you MUST ask clarifying questions
+using the AskUserQuestion tool.** Adapt questions based on the feature, but
+common technical areas to explore:
+
+- **Architecture Pattern:** "What architectural pattern should this follow?"
+- **Technology Stack:** "Are there specific technologies or libraries that must
+  be used?"
+- **Integration Points:** "What existing systems will this feature integrate
+  with?"
+- **Data Storage:** "What are the data storage requirements?"
+- **Performance Constraints:** "Are there specific performance requirements?"
+- **External Dependencies:** "Does this feature depend on external services?"
+- **Error Handling:** "What error handling and recovery strategies should be
+  used?"
+- **State Management:** "How should state be managed?"
+
+**Architecture Trade-offs (informed by RLM findings from Steps 2-3):**
+- "I found patterns [X] and [Y] in the codebase. Which should this feature
+  follow?"
+- "Existing [component] uses [approach]. Should we extend it or build new?"
+- "Past design for [similar feature] used [pattern]. Reuse or diverge?"
+
+Always include an **"All clear, proceed"** option for users with clear
+requirements. If user selects it, skip to Step 6.
+
+**Take the user's answers and incorporate them into the design below. Do NOT
+leave answered questions in an "Open Questions" section.**
+
+### Step 6: Synthesize Technical Design
 
 Create design document:
 
@@ -222,11 +252,6 @@ Create design document:
 
 {How to revert if issues arise}
 
-## Open Questions
-
-- [ ] {Technical question 1}
-- [ ] {Technical question 2}
-
 ## References
 
 ### Code (RLM):
@@ -243,7 +268,7 @@ Create design document:
 2. Run `/rlm-mem:plan:tasks` for task breakdown
 ```
 
-### Step 6: Save to Claude-Mem
+### Step 7: Save to Claude-Mem
 
 ```
 mcp__plugin_claude-mem_mcp-search__save_memory(
@@ -253,7 +278,7 @@ mcp__plugin_claude-mem_mcp-search__save_memory(
 )
 ```
 
-### Step 7: Save to File
+### Step 8: Save to File
 
 ```
 tasks/{jira-id}-{feature}/{date}-{jira-id}-{feature}-tech-design.md
@@ -265,6 +290,7 @@ tasks/{jira-id}-{feature}/{date}-{jira-id}-{feature}-tech-design.md
 2. Use RLM to discover existing patterns
 3. Identify integration points via RLM
 4. Learn from historical decisions via claude-mem
-5. Synthesize design that follows patterns + learns from past
-6. Save to both systems
-7. Suggest `/rlm-mem:plan:tasks` as next step
+5. **🚨 MANDATORY: Ask technical clarifying questions using AskUserQuestion tool**
+6. Synthesize design incorporating user's answers + RLM + claude-mem insights
+7. Save to both systems
+8. Suggest `/rlm-mem:plan:tasks` as next step

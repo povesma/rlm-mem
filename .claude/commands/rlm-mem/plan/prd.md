@@ -108,9 +108,38 @@ print(json.dumps(capabilities, indent=2))
 PY
 ```
 
-### Step 4: Synthesize PRD
+### Step 4: Ask Clarifying Questions (MANDATORY)
 
-Create PRD combining insights:
+**🚨 BEFORE writing the PRD, you MUST ask clarifying questions using the
+AskUserQuestion tool.** The goal is to understand the "what" and "why" of the
+feature. Adapt questions based on the prompt, but common areas to explore:
+
+- **Problem/Goal:** "What problem does this feature solve for the user?" or
+  "What is the main business goal we want to achieve?"
+- **Target Users:** "Who are the primary users of this feature?"
+- **Success Metrics:** "How will we measure success? What metrics matter most?"
+- **Use Cases:** "What are the main use cases this feature should support?"
+- **Feature Scope:** "What should this feature include? What should it
+  explicitly NOT include?"
+- **Acceptance Criteria:** "What are the key acceptance criteria that define
+  'done' for this feature?"
+- **Dependencies:** "Does this feature depend on other systems or services?"
+- **Risks:** "What are the main risks or potential blockers?"
+
+**Technical Context Questions (informed by RLM findings from Step 3):**
+- "I found [pattern from RLM]. Should this feature follow the same approach?"
+- "Existing [similar feature] handles [X]. Should we integrate or build new?"
+- "Current architecture uses [finding]. Any constraints for this feature?"
+
+Always include an **"All clear, proceed"** option for users with clear
+requirements. If user selects it, skip to Step 5.
+
+**Take the user's answers and incorporate them into the PRD below. Do NOT leave
+answered questions in an "Open Questions" section.**
+
+### Step 5: Synthesize PRD
+
+Create PRD combining insights + user's clarifications:
 
 ```markdown
 # {JIRA-ID}: {Feature Name} - PRD
@@ -199,12 +228,6 @@ As a {user type}, I want to {capability}, so that {benefit}.
 2. {Metric 2}: {Target value}
 3. {Metric 3}: {Target value}
 
-## Open Questions
-
-{Questions discovered during RLM analysis or missing from requirements}
-- [ ] {Question 1}
-- [ ] {Question 2}
-
 ## References
 
 ### From Codebase (RLM)
@@ -224,7 +247,7 @@ As a {user type}, I want to {capability}, so that {benefit}.
 3. Run `/rlm-mem:plan:tasks` to break down into tasks
 ```
 
-### Step 5: Save PRD to Claude-Mem
+### Step 6: Save PRD to Claude-Mem
 
 ```
 mcp__plugin_claude-mem_mcp-search__save_memory(
@@ -240,7 +263,7 @@ mcp__plugin_claude-mem_mcp-search__save_memory(
 )
 ```
 
-### Step 6: Save PRD to File System
+### Step 7: Save PRD to File System
 
 ```bash
 # Create task directory
@@ -250,7 +273,7 @@ mkdir -p tasks/{jira_id}-{feature_name_slug}
 # tasks/{jira_id}-{feature_name_slug}/{YYYY-MM-DD}-{jira_id}-{feature_name_slug}-prd.md
 ```
 
-### Step 7: Report Completion
+### Step 8: Report Completion
 
 ```markdown
 # ✅ PRD Created: {JIRA-ID}
@@ -353,8 +376,9 @@ Thanks to hybrid analysis, this PRD:
 1. Gather requirements from user (JIRA ID, feature name, problem)
 2. Search claude-mem for past PRDs to learn from
 3. Use RLM to analyze current codebase capabilities
-4. Synthesize PRD combining historical best practices + current reality
-5. Save to both claude-mem and file system
-6. Report what insights were used and quality improvements
-7. Suggest `/rlm-mem:plan:tech-design` as next step
-8. DO NOT start technical design yet, wait for user approval
+4. **🚨 MANDATORY: Ask clarifying questions using AskUserQuestion tool**
+5. Synthesize PRD incorporating user's answers + RLM + claude-mem insights
+6. Save to both claude-mem and file system
+7. Report what insights were used and quality improvements
+8. Suggest `/rlm-mem:plan:tech-design` as next step
+9. DO NOT start technical design yet, wait for user approval
