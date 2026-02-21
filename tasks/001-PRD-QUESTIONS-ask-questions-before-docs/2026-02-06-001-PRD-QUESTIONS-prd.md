@@ -1,6 +1,6 @@
 # 001-PRD-QUESTIONS: Mandatory Question Resolution Before Document Creation - PRD
 
-**Status**: Draft
+**Status**: Implemented
 **Created**: 2026-02-06
 **Task ID**: 001-PRD-QUESTIONS
 **Author**: Claude (via rlm-mem analysis)
@@ -48,7 +48,10 @@ all documents are complete and actionable from the start.
 - Reduce planning iterations and back-and-forth
 - Improve document quality by eliminating ambiguity
 - Leverage AskUserQuestion tool for structured clarification
-- Remove "Open Questions" sections entirely from planning docs
+- Handle "Open Questions" sections: keep only for genuinely unresolvable items;
+  incorporate answered questions into document body (no separate section)
+- Align tasks.md output format with `/coding:plan:tasks` (user stories,
+  numbered subtasks, TDD guidelines, two-phase generation)
 
 ## User Stories
 
@@ -119,10 +122,19 @@ creating task list
    - **Rationale**: Better UX than conversational, forces clear options
    - **Dependencies**: Tool must support multiple questions, options, descriptions
 
-5. **FR-5**: Remove "Open Questions" sections from document templates
+5. **FR-5**: Handle "Open Questions" sections properly
    - **Priority**: Medium
-   - **Rationale**: Documents should be complete, not contain unresolved items
-   - **Dependencies**: Clarification process actually resolves all questions
+   - **Rationale**: Answered questions belong in the document body, not a
+     separate section. Only genuinely unresolvable items (e.g., "performance
+     TBD after load testing") may remain in Open Questions.
+   - **Dependencies**: Clarification process resolves most questions
+
+6. **FR-6**: Align tasks.md output format with `/coding:plan:tasks`
+   - **Priority**: High
+   - **Rationale**: rlm-mem tasks format was a skeleton; coding format has
+     proven structure (user stories, numbered subtasks, TDD guidelines,
+     two-phase generation with user confirmation)
+   - **Dependencies**: None
 
 ### Non-Functional Requirements
 
@@ -140,13 +152,22 @@ Based on RLM analysis of existing architecture:
 - Changes to command files take effect immediately (no rebuild needed)
 - Must maintain compatibility with existing RLM REPL and claude-mem integration
 
+## Clarified Decisions (from user discussion)
+
+- **Scope**: All planning commands (PRD, tech-design, tasks)
+- **Question format**: ALWAYS use AskUserQuestion tool (not conversational)
+- **Execution trigger**: Mandatory with "All clear, proceed" skip option
+- **Open Questions handling**: Keep section only for genuinely unresolvable
+  items; answered questions get incorporated into document body
+- **Clarification placement**: Right before writing the MD file (after all
+  RLM/claude-mem analysis completes)
+- **Additional fix**: tasks.md output format must match `/coding:plan:tasks`
+
 ## Out of Scope
 
 What we explicitly won't do in this iteration:
-- Automatic question generation (AI guessing what to ask)
-- Multi-round questioning (resolve all in one AskUserQuestion call when possible)
 - Applying to non-planning commands (develop, review, git commands unchanged)
-- Changing document structure beyond removing "Open Questions" sections
+- Changing document structure beyond Open Questions handling
 
 ## Success Metrics
 

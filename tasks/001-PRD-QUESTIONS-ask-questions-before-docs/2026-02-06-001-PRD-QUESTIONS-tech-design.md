@@ -1,6 +1,6 @@
 # 001-PRD-QUESTIONS: Mandatory Question Resolution - Technical Design
 
-**Status**: Draft
+**Status**: Implemented
 **PRD**: [001-PRD-QUESTIONS-prd.md](2026-02-06-001-PRD-QUESTIONS-prd.md)
 **Created**: 2026-02-06
 
@@ -84,11 +84,18 @@ Step 8: Report completion (was Step 7)
 
 3. **`.claude/commands/rlm-mem/plan/tasks.md`**
    - **Changes**:
-     - Insert clarification step after reading PRD/design
-     - Focus on scope boundaries, complexity, dependencies
-     - Simpler than PRD/design (upstream should be clear)
-   - **Rationale**: Tasks are final planning step, should inherit clarity
-   - **Risk**: Lowest - tasks command is simpler
+     - **Complete rewrite** to match `/coding:plan:tasks` output format
+     - Add structured output: user stories (`1.0`), numbered subtasks (`1.1`,
+       `1.2`), checkboxes, progress tracking (`[4/0]`)
+     - Add Relevant Files section, Notes, TDD Planning Guidelines
+     - Add two-phase generation (parent tasks first → user confirms "Go" →
+       subtasks)
+     - Insert Step 4: Resolve Scope Uncertainties (MANDATORY) with
+       AskUserQuestion
+     - Add KISS principle and junior developer target audience
+   - **Rationale**: Original was a 5-line skeleton with no output format;
+     `/coding` version is proven and complete
+   - **Risk**: Medium - complete rewrite, but based on working `/coding` format
 
 ### Clarification Step Structure
 
@@ -156,23 +163,14 @@ I'm ready for you to create the document"}
 
 ### Open Questions Section Handling
 
-**Update document templates**:
+**User decision**: Do NOT have a separate section for answered questions.
+Incorporate all answered questions into the relevant document sections.
 
-```markdown
-## Open Questions
-
-⚠️ **This section should be EMPTY or minimal.** All resolvable questions must
-be addressed in Step X clarification.
-
-**Only include here**:
-- Questions that genuinely can't be answered yet (e.g., "Performance baseline
-TBD after load testing")
-- Questions requiring future implementation learnings
-- NOT product/architecture decisions - those were resolved above
-
-**Questions answered during clarification**:
-{If user provided answers, incorporate into relevant sections above, not here}
-```
+**Implementation**:
+- Remove "Open Questions" section from PRD and tech-design templates
+- Only keep if genuinely unresolvable items exist (e.g., "Performance baseline
+  TBD after load testing", or questions the user explicitly chose not to answer)
+- Answered questions are woven into Context, Requirements, Architecture, etc.
 
 ### Error Handling
 
