@@ -52,9 +52,20 @@ PY
 
 ### Step 4: Update Task Status
 
-**For completed tasks**:
+**Task marking rules — apply strictly:**
+- **`[X]`** — ONLY when tested AND passing, or explicitly confirmed by user
+- **`[~]`** — code exists but not yet tested/verified (pending testing)
+- **`[ ]`** — not started
+- Code analysis showing a file/function exists → `[~]` at best, never `[X]`
+- Never upgrade to `[X]` based on code presence alone
+
+**For implemented-but-untested tasks** (code found, no test evidence):
+- Mark subtask as `[~]`
+- Parent stays `[ ]` until all subtasks are at least `[~]`, then becomes `[ ]` with a note
+
+**For confirmed-complete tasks** (tested, passing, or user-confirmed):
 - Mark subtask as `[X]`
-- If all subtasks done, mark parent as `[X]`
+- If all subtasks `[X]`, mark parent as `[X]`
 - Update ai-docs/ when parent complete:
   - ai-docs/API.md
   - ai-docs/ARCHITECTURE.md
@@ -81,7 +92,7 @@ Stop checking when you find first truly incomplete task
 
 1. Load and read task file
 2. For each `[ ]` task, use RLM to verify in code
-3. Update status for completed tasks
-4. Update ai-docs/ when parent tasks complete
+3. Update status: `[~]` if code found but untested, `[X]` only if tested/confirmed
+4. Update ai-docs/ when parent tasks are `[X]`
 5. Save completions to claude-mem
-6. Halt at first incomplete
+6. Halt at first truly incomplete (`[ ]`) task
