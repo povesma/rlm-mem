@@ -77,87 +77,30 @@ mcp__plugin_claude-mem_mcp-search__get_observations(
 - Recent architectural decisions
 - Known issues or tech debt
 
-### Step 3: RLM Code Analysis
+### Step 3: Codebase Context
 
-**3a. Find documentation files via RLM**:
+**3a. Find project documentation:**
+
+Use the Glob tool to find documentation files:
+- Pattern: `**/README*.md`
+- Pattern: `**/CLAUDE*.md`
+
+Read top-level docs (depth 0-1) for project overview.
+
+**3b. Find active task files:**
+
+Use the Glob tool: `tasks/**/*-tasks.md`
+
+Read task files to identify current work and next tasks.
+Exclude paths containing `/archive/`.
+
+**3c. Recent git activity:**
+
 ```bash
-python3 ~/.claude/rlm_scripts/rlm_repl.py exec <<'PY'
-# Find documentation
-doc_files = [
-    path for path, meta in repo_index['files'].items()
-    if meta['lang'] in ['Markdown', 'Text', 'ReStructuredText']
-    and not meta['is_binary']
-    and ('README' in path.upper() or 'CLAUDE' in path.upper() or 'ai-docs' in path)
-]
-
-# Sort by relevance (root level first)
-doc_files.sort(key=lambda x: (x.count('/'), x))
-
-print('\n'.join(doc_files[:10]))
-PY
+git log --oneline -10
 ```
-
-**3b. Find active task files**:
 ```bash
-python3 ~/.claude/rlm_scripts/rlm_repl.py exec <<'PY'
-# Find task files (not archived)
-task_files = [
-    path for path, meta in repo_index['files'].items()
-    if 'tasks/' in path
-    and path.endswith('.md')
-    and '/archive/' not in path
-    and not meta['is_binary']
-]
-
-# Group by JIRA ID
-from collections import defaultdict
-import re
-
-tasks_by_jira = defaultdict(list)
-for tf in task_files:
-    match = re.search(r'([A-Z]+-\d+)', tf)
-    if match:
-        jira_id = match.group(1)
-        tasks_by_jira[jira_id].append(tf)
-
-# Print summary
-for jira_id, files in sorted(tasks_by_jira.items()):
-    print(f"{jira_id}: {len(files)} files")
-    for f in files:
-        print(f"  - {f}")
-PY
-```
-
-**3c. Analyze repository changes (if needed)**:
-```bash
-python3 ~/.claude/rlm_scripts/rlm_repl.py exec <<'PY'
-# Get recently modified files (requires git)
-import subprocess
-import json
-
-try:
-    result = subprocess.run(
-        ['git', 'log', '--pretty=format:', '--name-only', '--since=1.week.ago'],
-        capture_output=True,
-        text=True,
-        cwd=repo_index['repo_root']
-    )
-    recent_files = [f for f in result.stdout.split('\n') if f.strip()]
-
-    # Count modifications
-    from collections import Counter
-    mod_count = Counter(recent_files)
-
-    # Top 10 most modified
-    top_modified = mod_count.most_common(10)
-
-    print("Recently modified files:")
-    for file, count in top_modified:
-        lang = repo_index['files'].get(file, {}).get('lang', 'Unknown')
-        print(f"  {file} ({lang}): {count} changes")
-except Exception as e:
-    print(f"Could not get recent changes: {e}")
-PY
+git diff --stat HEAD
 ```
 
 ### Step 4: Synthesize Session Summary

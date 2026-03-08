@@ -361,10 +361,28 @@ Four command trees are available after installation. Use the right one for the j
 
 **Avoid `/dev`** — use `/coding` instead.
 
+### Recommended Allowlist
+
+`/start` is designed to need minimal shell permissions. To make
+session startup fully frictionless (zero permission prompts),
+add these to your Claude Code allow-list in settings:
+
+```
+python3 ~/.claude/rlm_scripts/rlm_repl.py *
+git log *
+git diff *
+```
+
+On macOS/Linux: Claude Code settings → Permissions → Add allowed
+commands. On Windows, use the equivalent paths with backslashes.
+
+Once configured, `/rlm-mem:discover:start` runs without any
+interruptions.
+
 ### Performance Expectations
 
 - **Init**: 30-60s (one-time per repo)
-- **Start**: 20-30s (per session)
+- **Start**: 20-30s (per session, zero prompts with allowlist)
 - **Planning**: 30-60s per command
 - **Implementation**: +20s overhead per task
 

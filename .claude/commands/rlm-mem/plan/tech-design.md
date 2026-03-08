@@ -121,6 +121,30 @@ requirements. If user selects it, skip to Step 6.
 **Take the user's answers and incorporate them into the design below. Do NOT
 leave answered questions in an "Open Questions" section.**
 
+### Step 5b: Content Quality Rules
+
+Every section must answer: "what would a developer not know
+without this?" If a section reads like a user manual, it does
+not belong in tech design.
+
+**DO include:**
+- Component boundaries and responsibilities
+- Data contracts (interfaces/types between components)
+- Communication patterns (sequence diagrams)
+- Reliability/failure handling patterns
+- Performance feasibility estimates
+- Rejected alternatives with reasons
+
+**DO NOT include:**
+- Setup guides, workflow steps (→ README)
+- CLI usage examples, sample output (→ README)
+- Algorithm parameter values, thresholds (→ code)
+- Installation instructions (→ README)
+- User-facing documentation (→ README)
+
+Be critical of your own output: if a section reads like a user
+manual, remove it or move it to the appropriate place.
+
 ### Step 6: Synthesize Technical Design
 
 Create design document:
