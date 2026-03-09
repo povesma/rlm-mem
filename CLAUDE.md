@@ -104,6 +104,11 @@ COMPARISON.md                   # vs original claude_code_RLM
 - **Claude-mem required**: Not optional
 - **Local state**: `.claude/rlm_state/` never committed (in `.gitignore`)
 - **Quality over speed**: Commands intentionally thorough
+- **Repo boundary**: ONLY read/write files inside this repo
+  (`/Users/dmytrop/povesma/AI/claude_code_RLM_mem`). Never
+  access `~/.claude/`, system files, or any path outside this
+  repo unless the user explicitly instructs it for a specific
+  operation (e.g. syncing installed commands).
 
 ## Task Marking Convention
 

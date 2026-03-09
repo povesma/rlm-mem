@@ -379,6 +379,52 @@ commands. On Windows, use the equivalent paths with backslashes.
 Once configured, `/rlm-mem:discover:start` runs without any
 interruptions.
 
+### Context Guard Hook (Optional)
+
+The Context Guard is a `UserPromptSubmit` hook that blocks new
+development work when your context window is too full to complete
+it safely.
+
+**Install:**
+
+```bash
+cp .claude/hooks/context-guard.sh ~/.claude/hooks/
+```
+
+**Register in `~/.claude/settings.json`:**
+
+```json
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/context-guard.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**How it works:** When context usage reaches 80%, any prompt
+containing development keywords (`implement`, `build`, `create`,
+`refactor`, etc.) is blocked with a message explaining what to
+do. Docs updates, task list changes, commits, and `/check` always
+pass through.
+
+**Override:** Prefix your prompt with `override:` to bypass the
+block for a single prompt.
+
+**Configure threshold** (default 80%):
+
+```bash
+export CONTEXT_GUARD_THRESHOLD=70  # warn earlier
+```
+
 ### Performance Expectations
 
 - **Init**: 30-60s (one-time per repo)
