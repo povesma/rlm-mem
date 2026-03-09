@@ -111,8 +111,13 @@ python3 --version  # Should show 3.8 or higher
 python3 ~/.claude/rlm_scripts/rlm_repl.py --help
 ```
 
-`install.sh` copies all files automatically. Run it again after
-pulling updates.
+`install.sh` copies agents, commands, hooks, and RLM scripts to
+`~/.claude/`. Run it:
+- **After initial clone** — to install everything
+- **After `git pull`** — to sync updates to your installation
+- **After editing repo files** — to apply local changes
+
+Windows users should use the manual copy steps above.
 
 **Expected output:**
 ```
@@ -536,13 +541,10 @@ To update to the latest version:
 cd ~/rlm-mem  # Or wherever you cloned
 git pull
 
-# 2. Re-run installation steps
-# macOS:
-cp .claude/rlm_scripts/rlm_repl.py ~/.claude/rlm_scripts/
-cp .claude/agents/rlm-subcall.md ~/.claude/agents/
-cp -r .claude/commands/rlm-mem ~/.claude/commands/
+# 2. Sync to ~/.claude/
+bash install.sh
 
-# Windows: See installation section above
+# Windows: use the manual copy steps from the Installation section
 ```
 
 ## 📝 License
