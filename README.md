@@ -87,30 +87,32 @@ cd ~/
 git clone <repository-url> rlm-mem
 cd rlm-mem
 
-# 2. Copy RLM scripts to Claude config
-mkdir -p ~/.claude/rlm_scripts
-mkdir -p ~/.claude/agents
+# 2. Run the install script (recommended)
+bash install.sh
+
+# Or manually copy files:
+mkdir -p ~/.claude/rlm_scripts ~/.claude/agents ~/.claude/commands ~/.claude/hooks
 cp .claude/rlm_scripts/rlm_repl.py ~/.claude/rlm_scripts/
 cp .claude/agents/rlm-subcall.md ~/.claude/agents/
-
-# 3. Copy test subagents (optional but recommended)
-# test-backend and test-review work immediately
-# test-e2e-* require Playwright MCP (see "Nice to Have" prerequisites)
+# test subagents (optional but recommended):
 cp .claude/agents/test-*.md ~/.claude/agents/
-
-# 4. Copy command definitions
-mkdir -p ~/.claude/commands
 cp -r .claude/commands/rlm-mem ~/.claude/commands/
+# context guard hook (optional):
+cp .claude/hooks/context-guard.sh ~/.claude/hooks/
+chmod +x ~/.claude/hooks/context-guard.sh
 
-# 5. Make REPL script executable
+# 3. Make REPL script executable
 chmod +x ~/.claude/rlm_scripts/rlm_repl.py
 
-# 6. Verify Python 3 is available
+# 4. Verify Python 3 is available
 python3 --version  # Should show 3.8 or higher
 
-# 7. Test installation
+# 5. Test installation
 python3 ~/.claude/rlm_scripts/rlm_repl.py --help
 ```
+
+`install.sh` copies all files automatically. Run it again after
+pulling updates.
 
 **Expected output:**
 ```
@@ -169,12 +171,14 @@ After installation, your `~/.claude/` directory will contain:
 │   ├── test-e2e-generator.md   # Playwright test code generator (requires Playwright MCP)
 │   └── test-e2e-healer.md      # Failing test debugger/repair (requires Playwright MCP)
 ├── commands/
-│   └── rlm-mem/                # All 12 rlm-mem commands
+│   └── rlm-mem/                # All 13 rlm-mem commands
 │       ├── discover/
 │       ├── plan/
-│       ├── develop/
+│       ├── develop/            # impl, build, sc, save
 │       ├── review/
 │       └── git/
+├── hooks/
+│   └── context-guard.sh        # Context window warning hook (optional)
 └── rlm_scripts/
     └── rlm_repl.py             # Persistent REPL for RLM
 ```
@@ -251,10 +255,11 @@ This provides:
 - `/rlm-mem:plan:tasks` - Task breakdown with complexity analysis
 - `/rlm-mem:plan:check` - Verify task completion status
 
-### Development Phase (3 commands)
+### Development Phase (4 commands)
 - `/rlm-mem:develop:impl` - Implement following patterns
 - `/rlm-mem:develop:build` - Build with RLM error analysis
 - `/rlm-mem:develop:sc` - Review screenshots
+- `/rlm-mem:develop:save` - Wrap up session, save to claude-mem
 
 ### Review Phase (1 command)
 - `/rlm-mem:review:pr-review` - PR review with impact analysis
@@ -410,16 +415,14 @@ cp .claude/hooks/context-guard.sh ~/.claude/hooks/
 }
 ```
 
-**How it works:** When context usage reaches 80%, any prompt
-containing development keywords (`implement`, `build`, `create`,
-`refactor`, etc.) is blocked with a message explaining what to
-do. Docs updates, task list changes, commits, and `/check` always
-pass through.
+**How it works:** When context usage reaches the threshold, any
+prompt containing development keywords (`implement`, `build`,
+`create`, `refactor`, etc.) triggers a warning injected into
+Claude's context. You can still proceed — the warning is
+informational, not a hard block. Docs updates, task list changes,
+commits, and `/check` always pass through silently.
 
-**Override:** Prefix your prompt with `override:` to bypass the
-block for a single prompt.
-
-**Configure threshold** (default 80%):
+**Configure threshold** (default 85%):
 
 ```bash
 export CONTEXT_GUARD_THRESHOLD=70  # warn earlier
