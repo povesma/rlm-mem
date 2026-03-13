@@ -60,16 +60,7 @@ rlm-mem workflow combines:
 | Command | Purpose | Integration |
 |---------|---------|-------------|
 | `/rlm-mem:develop:impl` | Implement tasks | Pattern discovery (RLM) + Historical context (mem) |
-
-### Review Phase
-| Command | Purpose | Integration |
-|---------|---------|-------------|
-| `/rlm-mem:review:pr-review` | Review PR | Impact analysis (RLM) + Pattern compliance (mem) |
-
-### Git Phase
-| Command | Purpose | Integration |
-|---------|---------|-------------|
-| `/rlm-mem:git:commit` | Smart commit | Impact analysis (RLM) + Contextual message (mem) |
+| `/rlm-mem:develop:save` | Wrap up session | Persist decisions + context to claude-mem |
 
 ## 🎮 Complete Workflow
 
@@ -92,10 +83,8 @@ Ready to work!
   ↓ (Realistic estimates from data)
 /rlm-mem:develop:impl
   ↓ (Implement with pattern awareness)
-/rlm-mem:review:pr-review
-  ↓ (Comprehensive quality check)
-/rlm-mem:git:commit
-  ↓ (Meaningful commit message)
+/rlm-mem:develop:save
+  ↓ (Wrap up session, persist context)
 Done! (With quality)
 ```
 
@@ -105,7 +94,7 @@ Done! (With quality)
   ↓ (Quick context refresh)
 /rlm-mem:develop:impl
   ↓ (Continue work)
-/rlm-mem:git:commit
+/rlm-mem:develop:save
 Done!
 ```
 
@@ -228,6 +217,19 @@ Based on RLM paper and claude-mem benefits:
 - **RLM Commands**: `~/.claude/commands/rlm/README.md`
 - **Claude-Mem**: `~/artec/claude-mem/`
 - **Coding Commands**: `~/.claude/commands/coding/README.md`
+
+## 📌 TODO: Future Commands
+
+These commands were removed as stubs and need proper design before
+reimplementation. Each requires its own PRD and from-scratch design:
+
+| Command | Purpose | Notes |
+|---------|---------|-------|
+| `/rlm-mem:develop:build` | Build + test with RLM error analysis | Needs framework detection, error parsing, test subagent integration |
+| `/rlm-mem:develop:sc` | Review screenshots against implementation | Needs multimodal comparison workflow |
+| `/rlm-mem:review:pr-review` | PR review with RLM impact + pattern compliance | Needs dependency graph traversal, blast radius analysis |
+| `/rlm-mem:git:commit` | Smart commit with RLM-aware message generation | Needs impact analysis, conventional commit formatting |
+| `/rlm-mem:discover:health` | Verify all dependencies (RLM, claude-mem, Playwright) | New command — check system readiness |
 
 ## 🤝 Contributing
 

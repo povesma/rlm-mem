@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 RLM-Mem is an **installation package** for Claude Code that combines:
 - **RLM**: Analyzes large codebases via persistent Python REPL
 - **Claude-Mem** (MANDATORY): Semantic memory of past decisions
-- **12 Commands**: Complete development workflow
+- **8 Commands**: Complete development workflow
 - **5 Test Subagents**: Isolated testing agents invoked via Task tool
 
 Users install to `~/.claude/` to use across all their projects.
@@ -43,7 +43,7 @@ Users install to `~/.claude/` to use across all their projects.
      claude-mem or RLM
 
 4. **Commands** (`.claude/commands/rlm-mem/`)
-   - 12 commands: discover (2), plan (4), develop (3), review (1), git (1)
+   - 8 commands: discover (2), plan (4), develop (2)
    - Each integrates RLM + claude-mem via Bash and MCP tools
 
 ### Installation Flow
@@ -90,7 +90,7 @@ Edit `rlm_repl.py` → `LANGUAGE_MAP` dict.
 │   ├── test-e2e-planner.md     # E2E planner, Playwright fork (Sonnet)
 │   ├── test-e2e-generator.md   # E2E generator, Playwright fork (Sonnet)
 │   └── test-e2e-healer.md      # E2E healer, Playwright fork (Sonnet)
-├── commands/rlm-mem/           # 12 command definitions
+├── commands/rlm-mem/           # 8 command definitions
 └── rlm_scripts/rlm_repl.py     # REPL (833 lines)
 
 README.md                       # User guide
@@ -104,6 +104,24 @@ COMPARISON.md                   # vs original claude_code_RLM
 - **Claude-mem required**: Not optional
 - **Local state**: `.claude/rlm_state/` never committed (in `.gitignore`)
 - **Quality over speed**: Commands intentionally thorough
+
+## Safety Rules
+
+**STRICTLY FORBIDDEN** to run any command that can lead to loss of work or
+data without first explaining the intent and getting explicit user approval.
+This includes but is not limited to:
+
+- `git reset` (any form)
+- `git stash` / `git stash pop` / `git stash drop`
+- `git clean`
+- `git rm`
+- `git branch -D` (force delete)
+- `git push --force`
+- `rm` / `rm -rf`
+- Any command with flags like `-f`, `--force`, `--hard` that bypass safety checks
+
+**Protocol**: State what you intend to do and why, then wait for the user to
+explicitly approve before running the command.
 
 ## Task Marking Convention
 

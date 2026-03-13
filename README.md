@@ -8,7 +8,7 @@ RLM-Mem provides a complete workflow for working with large codebases (1000+ fil
 
 - **RLM (Recursive Language Model)**: Analyzes your codebase at scale, discovers patterns, estimates complexity
 - **Claude-Mem**: Provides semantic memory of past decisions, PRDs, implementations, and lessons learned
-- **12 Commands**: Cover the complete development lifecycle from planning to deployment
+- **8 Commands**: Cover the complete development lifecycle from planning to deployment
 
 ### How It Works
 
@@ -169,12 +169,12 @@ After installation, your `~/.claude/` directory will contain:
 │   ├── test-e2e-generator.md   # Playwright test code generator (requires Playwright MCP)
 │   └── test-e2e-healer.md      # Failing test debugger/repair (requires Playwright MCP)
 ├── commands/
-│   └── rlm-mem/                # All 12 rlm-mem commands
-│       ├── discover/
-│       ├── plan/
-│       ├── develop/
-│       ├── review/
-│       └── git/
+│   └── rlm-mem/                # All 8 rlm-mem commands
+│       ├── discover/           # init, start
+│       ├── plan/               # prd, tech-design, tasks, check
+│       └── develop/            # impl, save
+├── hooks/
+│   └── context-guard.sh        # Context window warning hook (optional)
 └── rlm_scripts/
     └── rlm_repl.py             # Persistent REPL for RLM
 ```
@@ -229,14 +229,7 @@ This provides:
 
 ```
 /rlm-mem:develop:impl       # Implement with pattern discovery
-/rlm-mem:develop:build      # Build and test
-```
-
-### 5. Review & Commit
-
-```
-/rlm-mem:review:pr-review   # Review with impact analysis
-/rlm-mem:git:commit         # Smart commit message
+/rlm-mem:develop:save       # Wrap up session, persist context
 ```
 
 ## 📚 Available Commands
@@ -251,16 +244,9 @@ This provides:
 - `/rlm-mem:plan:tasks` - Task breakdown with complexity analysis
 - `/rlm-mem:plan:check` - Verify task completion status
 
-### Development Phase (3 commands)
+### Development Phase (2 commands)
 - `/rlm-mem:develop:impl` - Implement following patterns
-- `/rlm-mem:develop:build` - Build with RLM error analysis
-- `/rlm-mem:develop:sc` - Review screenshots
-
-### Review Phase (1 command)
-- `/rlm-mem:review:pr-review` - PR review with impact analysis
-
-### Git Phase (1 command)
-- `/rlm-mem:git:commit` - Smart commits with context
+- `/rlm-mem:develop:save` - Wrap up session, save to claude-mem
 
 ## 🧪 Test Subagents
 
@@ -453,7 +439,7 @@ claude
 
 # 3. In Claude Code, check available commands
 # Type: /rlm-mem:
-# You should see all 12 commands in autocomplete
+# You should see all 8 commands in autocomplete
 
 # 4. Initialize test repo
 /rlm-mem:discover:init

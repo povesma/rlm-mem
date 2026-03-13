@@ -18,7 +18,7 @@ The original project demonstrated how to implement Recursive Language Models usi
 |-----------|-----------------|---------|
 | **rlm_repl.py** | ✓ (431 lines)<br>Text-only processing | ✓ (833 lines)<br>+ Repository indexing<br>+ Multi-language (50+ types)<br>+ Binary file handling<br>+ Git integration<br>+ Complexity analysis |
 | **Subagent** | ✓ (44 lines)<br>Text analysis | ✓ (79 lines)<br>+ Code-specific analysis<br>+ Symbol extraction<br>+ Pattern detection<br>+ File type awareness |
-| **Commands** | ✓ (1 skill)<br>`/rlm` for text files | ✓ (12 commands)<br>+ discover (2)<br>+ plan (4)<br>+ develop (3)<br>+ review (1)<br>+ git (1) |
+| **Commands** | ✓ (1 skill)<br>`/rlm` for text files | ✓ (8 commands)<br>+ discover (2)<br>+ plan (4)<br>+ develop (2) |
 | **Documentation** | ✓ Basic README | ✓ README.md<br>+ TROUBLESHOOTING.md<br>+ IMPLEMENTATION_SUMMARY.md<br>+ Per-command docs |
 | **Installation** | Work inside repo directory | Install to `~/.claude/`<br>(works in ANY project) |
 | **Claude-mem** | ❌ Not integrated | ✅ Full integration |

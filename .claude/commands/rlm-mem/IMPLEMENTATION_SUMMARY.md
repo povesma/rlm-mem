@@ -18,17 +18,12 @@ All essential functionality from `dev/` commands has been preserved and enhanced
 │   ├── tech-design.md            # Design with pattern discovery
 │   ├── tasks.md                  # Tasks with complexity estimation
 │   └── check.md                  # Verify task completion
-├── develop/
-│   ├── impl.md                   # Implementation with patterns
-│   ├── build.md                  # Build with error analysis
-│   └── sc.md                     # Screenshot review
-├── review/
-│   └── pr-review.md              # PR review with impact analysis
-└── git/
-    └── commit.md                 # Smart commits with context
+└── develop/
+    ├── impl.md                   # Implementation with patterns
+    └── save.md                   # Session wrap-up, persist context
 ```
 
-## 🎯 Core Workflow (12 Commands)
+## 🎯 Core Workflow (8 Commands)
 
 | Phase | Command | Enhancements |
 |-------|---------|--------------|
@@ -39,10 +34,7 @@ All essential functionality from `dev/` commands has been preserved and enhanced
 | | `/rlm-mem:plan:tasks` | Complexity analysis + historical velocity |
 | | `/rlm-mem:plan:check` | RLM code verification |
 | **Development** | `/rlm-mem:develop:impl` | Pattern following + lessons learned |
-| | `/rlm-mem:develop:build` | RLM-aware error analysis |
-| | `/rlm-mem:develop:sc` | Screenshot review |
-| **Review** | `/rlm-mem:review:pr-review` | Impact analysis + pattern compliance |
-| **Git** | `/rlm-mem:git:commit` | Impact-aware commit messages |
+| | `/rlm-mem:develop:save` | Session wrap-up, persist context |
 
 ## 🔑 Key Innovations
 
@@ -108,9 +100,8 @@ All essential functionality from `dev/` commands has been preserved and enhanced
 # Implement
 /rlm-mem:develop:impl
 
-# Review & commit
-/rlm-mem:review:pr-review
-/rlm-mem:git:commit
+# Wrap up session
+/rlm-mem:develop:save
 ```
 
 ## ⚙️ Infrastructure
