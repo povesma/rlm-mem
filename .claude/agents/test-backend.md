@@ -126,13 +126,18 @@ If RLM is unavailable or fails, skip and proceed with existing context.
   b) A test issue (wrong assertion, setup problem) → fix the test and rerun
 
 ### Step 6: Save Findings to Claude-Mem (if available)
-Save significant findings only (new bugs, non-obvious gaps):
+Save significant findings only (new bugs, non-obvious gaps).
+Write the finding to a temp file, then Read it — the PostToolUse hook
+captures it automatically as a claude-mem observation:
 ```
-mcp__plugin_claude-mem_mcp-search__save_memory(
-  text="[TYPE: TEST-FINDING]\n<finding details>",
-  title="<area> - <finding summary>",
-  project="<project_name>"
-)
+Write /tmp/claude-mem-test-backend-TEST-FINDING.md:
+  # <area> - <finding summary>
+  [TYPE: TEST-FINDING]
+  [PROJECT: <project_name>]
+
+  <finding details>
+
+Then: Read /tmp/claude-mem-test-backend-TEST-FINDING.md
 ```
 Do NOT save routine "all tests passed" results.
 

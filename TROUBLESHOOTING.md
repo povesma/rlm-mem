@@ -378,13 +378,15 @@ mcp__plugin_claude-mem_mcp-search__search returned 0 results
 2. **Check claude-mem is running:**
 Look for claude-mem worker process.
 
-3. **Manually save some data:**
+3. **Manually trigger an observation:**
+Write a test file and Read it — the PostToolUse hook should capture it:
 ```
-mcp__plugin_claude-mem_mcp-search__save_memory(
-  text="Test observation",
-  title="Test",
-  project="your-project"
-)
+Write /tmp/claude-mem-test-observation.md:
+  # Test Observation
+  [TYPE: TEST]
+  This is a test observation.
+
+Then: Read /tmp/claude-mem-test-observation.md
 ```
 
 ---

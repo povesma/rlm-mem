@@ -67,13 +67,22 @@ PY
   - ai-docs/USAGE.md
 
 **Save completion to claude-mem**:
+
+Write the following to `/tmp/claude-mem-{jira_id}-TASK-COMPLETION.md`:
 ```
-mcp__plugin_claude-mem_mcp-search__save_memory(
-  text=f"[JIRA: {jira_id}]\n[TYPE: TASK-COMPLETION]\n\nTask '{task_name}' verified complete via code analysis.\n\nFiles modified:\n{file_list}",
-  title=f"{jira_id} - Task Completion",
-  project=project_name
-)
+# {jira_id} - Task Completion
+
+[TYPE: TASK-COMPLETION]
+[PROJECT: {project_name}]
+
+Task '{task_name}' verified complete via code analysis.
+
+Files modified:
+{file_list}
 ```
+
+Then Read `/tmp/claude-mem-{jira_id}-TASK-COMPLETION.md`.
+The PostToolUse hook captures this automatically as a claude-mem observation.
 
 ### Step 5: Scope Drift Detection
 
@@ -94,5 +103,5 @@ Stop checking when you find first truly incomplete task
 4. Update status: `[~]` if code found but untested, `[X]` only if tested/confirmed
 5. Flag any code found that doesn't match a task (scope drift)
 6. Update ai-docs/ when parent tasks are `[X]`
-7. Save completions to claude-mem
+7. Save completions: Write to `/tmp/claude-mem-{jira_id}-TASK-COMPLETION.md`, then Read it
 8. Halt at first truly incomplete (`[ ]`) task

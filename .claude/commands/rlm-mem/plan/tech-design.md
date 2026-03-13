@@ -292,21 +292,15 @@ Create design document:
 2. Run `/rlm-mem:plan:tasks` for task breakdown
 ```
 
-### Step 7: Save to Claude-Mem
+### Step 7: Save to Claude-Mem and File
 
-```
-mcp__plugin_claude-mem_mcp-search__save_memory(
-  text=f"[JIRA: {jira_id}]\n[TYPE: TECH-DESIGN]\n\n{design_content}",
-  title=f"{jira_id} - Technical Design",
-  project=project_name
-)
-```
-
-### Step 8: Save to File
-
+Save the design to:
 ```
 tasks/{jira-id}-{feature}/{date}-{jira-id}-{feature}-tech-design.md
 ```
+
+Then Read the file you just created. The PostToolUse hook captures the full
+content as a claude-mem observation automatically.
 
 ## Final Instructions
 
@@ -316,5 +310,5 @@ tasks/{jira-id}-{feature}/{date}-{jira-id}-{feature}-tech-design.md
 4. Learn from historical decisions via claude-mem
 5. **🚨 MANDATORY: Ask technical clarifying questions using AskUserQuestion tool**
 6. Synthesize design incorporating user's answers + RLM + claude-mem insights
-7. Save to both systems
+7. Save to file, then Read the file — hook auto-captures it to claude-mem
 8. Suggest `/rlm-mem:plan:tasks` as next step

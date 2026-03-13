@@ -213,13 +213,19 @@ new_claude_mem_entries:
 
 ## Save Findings to Claude-Mem (if available)
 
-After completing the plan, save significant discoveries:
+After completing the plan, save significant discoveries.
+Write the finding to a temp file, then Read it — the PostToolUse hook
+captures it automatically as a claude-mem observation:
 ```
-mcp__plugin_claude-mem_mcp-search__save_memory(
-  text="[TYPE: TEST-FINDING]\n[E2E-PLAN]\n<findings>",
-  title="<area> - E2E test plan findings",
-  project="<project_name>"
-)
+Write /tmp/claude-mem-test-e2e-planner-TEST-FINDING.md:
+  # <area> - E2E test plan findings
+  [TYPE: TEST-FINDING]
+  [E2E-PLAN]
+  [PROJECT: <project_name>]
+
+  <findings>
+
+Then: Read /tmp/claude-mem-test-e2e-planner-TEST-FINDING.md
 ```
 Save only non-obvious findings: unexpected app behaviors, accessibility
 issues, UI states that seem untested. Do NOT save routine plan summaries.

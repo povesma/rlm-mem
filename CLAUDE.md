@@ -60,7 +60,9 @@ cp -r .claude/commands/rlm-mem ~/.claude/commands/
 
 Commands use MCP tools (requires plugin):
 - `mcp__plugin_claude-mem_mcp-search__search`
-- `mcp__plugin_claude-mem_mcp-search__save_memory`
+
+Writing to claude-mem is automatic via the PostToolUse hook — commands
+Write output to files or temp files and then Read them to trigger capture.
 
 Commands should **fail with clear error** if claude-mem unavailable.
 

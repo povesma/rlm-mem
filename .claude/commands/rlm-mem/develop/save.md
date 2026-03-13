@@ -7,8 +7,8 @@ Run this when context is getting full or before closing Claude Code.
 
 - **Task files** (`tasks/**/*-tasks.md`) — on disk, always current
 - **Code changes** — on disk
-- **Claude-mem observations** — saved by explicit `save_memory`
-  calls throughout the session
+- **Claude-mem observations** — captured automatically via PostToolUse
+  hook when files are written and read throughout the session
 
 ## What This Command Does
 
@@ -36,15 +36,23 @@ task/tech-design files?
 
 ### 2. Save Missing Context
 
-For each significant item not yet captured:
+For each significant item not yet captured, write it to a temp file
+and Read it (the PostToolUse hook captures it as a claude-mem observation):
 
+Write to `/tmp/claude-mem-{jira_id}-SESSION-DECISION-{n}.md`
+(use n=1, 2, 3… for multiple decisions):
 ```
-mcp__plugin_claude-mem_mcp-search__save_memory(
-  text="[JIRA: {jira_id}]\n[TYPE: SESSION-DECISION]\n\n{decision or agreement}\n\nContext: {why it was decided}",
-  title="{jira_id} - {short description}",
-  project="{project_name}"
-)
+# {jira_id} - {short description}
+
+[TYPE: SESSION-DECISION]
+[PROJECT: {project_name}]
+
+{decision or agreement}
+
+Context: {why it was decided}
 ```
+
+Then Read `/tmp/claude-mem-{jira_id}-SESSION-DECISION-{n}.md`.
 
 Only save what's genuinely missing. Do not duplicate what's
 already in task files or previous claude-mem observations.

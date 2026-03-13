@@ -180,13 +180,19 @@ If tests fail, analyze whether the failure is:
 - A timing issue → add appropriate waits
 
 ### Step 5: Save to Claude-Mem (if available)
-Save useful patterns discovered during generation:
+Save useful patterns discovered during generation.
+Write the finding to a temp file, then Read it — the PostToolUse hook
+captures it automatically as a claude-mem observation:
 ```
-mcp__plugin_claude-mem_mcp-search__save_memory(
-  text="[TYPE: TEST-FINDING]\n[E2E-PATTERN]\n<pattern details>",
-  title="<area> - E2E test pattern: <summary>",
-  project="<project_name>"
-)
+Write /tmp/claude-mem-test-e2e-generator-TEST-FINDING.md:
+  # <area> - E2E test pattern: <summary>
+  [TYPE: TEST-FINDING]
+  [E2E-PATTERN]
+  [PROJECT: <project_name>]
+
+  <pattern details>
+
+Then: Read /tmp/claude-mem-test-e2e-generator-TEST-FINDING.md
 ```
 Save: effective selector strategies, useful test utilities created,
 non-obvious wait patterns. Do NOT save routine generation results.

@@ -247,23 +247,7 @@ As a {user type}, I want to {capability}, so that {benefit}.
 3. Run `/rlm-mem:plan:tasks` to break down into tasks
 ```
 
-### Step 6: Save PRD to Claude-Mem
-
-```
-mcp__plugin_claude-mem_mcp-search__save_memory(
-  text=f"""[JIRA: {jira_id}]
-[TYPE: PRD]
-[PROJECT: {project_name}]
-[STATUS: Draft]
-
-{full_prd_content}
-""",
-  title=f"{jira_id} - {feature_name} PRD",
-  project=project_name
-)
-```
-
-### Step 7: Save PRD to File System
+### Step 6: Save PRD to Claude-Mem and File System
 
 ```bash
 # Create task directory
@@ -378,7 +362,8 @@ Thanks to hybrid analysis, this PRD:
 3. Use RLM to analyze current codebase capabilities
 4. **🚨 MANDATORY: Ask clarifying questions using AskUserQuestion tool**
 5. Synthesize PRD incorporating user's answers + RLM + claude-mem insights
-6. Save to both claude-mem and file system
+6. Save PRD file to file system, then Read it — the PostToolUse hook captures
+   the full content as a claude-mem observation automatically
 7. Report what insights were used and quality improvements
 8. Suggest `/rlm-mem:plan:tech-design` as next step
 9. DO NOT start technical design yet, wait for user approval

@@ -174,13 +174,19 @@ project_name: my-project
 - Preserve original test intent — do not weaken assertions to make tests pass
 
 ### Step 5: Save Findings to Claude-Mem (if available)
-After completing healing, save patterns that will help future sessions:
+After completing healing, save patterns that will help future sessions.
+Write the finding to a temp file, then Read it — the PostToolUse hook
+captures it automatically as a claude-mem observation:
 ```
-mcp__plugin_claude-mem_mcp-search__save_memory(
-  text="[TYPE: TEST-FINDING]\n[E2E-HEALING]\n<healing patterns and root causes>",
-  title="<area> - E2E healing: <summary of what changed>",
-  project="<project_name>"
-)
+Write /tmp/claude-mem-test-e2e-healer-TEST-FINDING.md:
+  # <area> - E2E healing: <summary of what changed>
+  [TYPE: TEST-FINDING]
+  [E2E-HEALING]
+  [PROJECT: <project_name>]
+
+  <healing patterns and root causes>
+
+Then: Read /tmp/claude-mem-test-e2e-healer-TEST-FINDING.md
 ```
 Save: recurring selector patterns that drift, common timing fixes, known data
 setup requirements. Do NOT save routine "fixed a broken selector" entries.

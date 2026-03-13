@@ -150,13 +150,19 @@ For each item, determine:
 - If no test, what severity is this gap?
 
 ### Step 6: Save Findings to Claude-Mem (if available)
-Save significant gaps (high severity) for future sessions:
+Save significant gaps (high severity) for future sessions.
+Write the finding to a temp file, then Read it — the PostToolUse hook
+captures it automatically as a claude-mem observation:
 ```
-mcp__plugin_claude-mem_mcp-search__save_memory(
-  text="[TYPE: TEST-FINDING]\n[REVIEW]\n<gap details>",
-  title="<area> - test coverage gap: <summary>",
-  project="<project_name>"
-)
+Write /tmp/claude-mem-test-review-TEST-FINDING.md:
+  # <area> - test coverage gap: <summary>
+  [TYPE: TEST-FINDING]
+  [REVIEW]
+  [PROJECT: <project_name>]
+
+  <gap details>
+
+Then: Read /tmp/claude-mem-test-review-TEST-FINDING.md
 ```
 
 ## Output Contract

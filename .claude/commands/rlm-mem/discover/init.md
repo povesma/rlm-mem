@@ -82,14 +82,15 @@ This will:
 
 **4b. Index project overview**:
 
-If README.md or CLAUDE.md exist:
+If README.md or CLAUDE.md exist, synthesize a project overview and persist it:
+
+Write the following to `/tmp/claude-mem-{project_name}-PROJECT-OVERVIEW.md`:
 ```
-mcp__plugin_claude-mem_mcp-search__save_memory(
-  text=f"""[TYPE: PROJECT-OVERVIEW]
+# {project_name} - Project Overview
+
+[TYPE: PROJECT-OVERVIEW]
 [PROJECT: {project_name}]
 [SOURCE: README.md, CLAUDE.md]
-
-# Project Overview
 
 {readme_content}
 
@@ -100,22 +101,21 @@ mcp__plugin_claude-mem_mcp-search__save_memory(
 - Repository size: {rlm_size_mb} MB
 - Primary languages: {rlm_top_languages}
 - Indexed at: {timestamp}
-""",
-  title=f"{project_name} - Project Overview",
-  project=project_name
-)
 ```
+
+Then Read `/tmp/claude-mem-{project_name}-PROJECT-OVERVIEW.md`.
+The PostToolUse hook captures this automatically as a claude-mem observation.
 
 **4c. Index RLM analysis as baseline**:
 
+Write the following to `/tmp/claude-mem-{project_name}-CODEBASE-ANALYSIS.md`:
 ```
-mcp__plugin_claude-mem_mcp-search__save_memory(
-  text=f"""[TYPE: CODEBASE-ANALYSIS]
+# {project_name} - Codebase Analysis
+
+[TYPE: CODEBASE-ANALYSIS]
 [PROJECT: {project_name}]
 [ANALYZER: RLM]
 [SOURCE: Initial indexing]
-
-# Codebase Analysis - Initial Snapshot
 
 ## Repository Statistics
 - **Total files**: {total_files}
@@ -136,67 +136,42 @@ mcp__plugin_claude-mem_mcp-search__save_memory(
 {directory_structure}
 
 This baseline analysis was performed by RLM indexing at {timestamp}.
-""",
-  title=f"{project_name} - Initial Codebase Analysis",
-  project=project_name
-)
 ```
+
+Then Read `/tmp/claude-mem-{project_name}-CODEBASE-ANALYSIS.md`.
+The PostToolUse hook captures this automatically as a claude-mem observation.
 
 **4d. Index existing tasks directory** (if exists):
 
 For each file in `/tasks/`:
-- **PRD files** (`*-prd.md`):
-  ```
-  mcp__plugin_claude-mem_mcp-search__save_memory(
-    text=f"[JIRA: {jira_id}]\n[TYPE: PRD]\n\n{content}",
-    title=f"{jira_id} - PRD",
-    project=project_name
-  )
-  ```
+- **PRD files** (`*-prd.md`): Read each file directly.
+  The PostToolUse hook captures the full content as a claude-mem observation automatically.
 
-- **Tech-design files** (`*-tech-design.md`):
-  ```
-  mcp__plugin_claude-mem_mcp-search__save_memory(
-    text=f"[JIRA: {jira_id}]\n[TYPE: TECH-DESIGN]\n\n{content}",
-    title=f"{jira_id} - Tech Design",
-    project=project_name
-  )
-  ```
+- **Tech-design files** (`*-tech-design.md`): Read each file directly.
+  The PostToolUse hook captures the full content automatically.
 
-- **Task list files** (`*-tasks.md`):
-  ```
-  mcp__plugin_claude-mem_mcp-search__save_memory(
-    text=f"[JIRA: {jira_id}]\n[TYPE: TASK-LIST]\n\n{content}",
-    title=f"{jira_id} - Tasks",
-    project=project_name
-  )
-  ```
+- **Task list files** (`*-tasks.md`): Read each file directly.
+  The PostToolUse hook captures the full content automatically.
 
-- **Review files** (`*-review.md`):
-  ```
-  mcp__plugin_claude-mem_mcp-search__save_memory(
-    text=f"[JIRA: {jira_id}]\n[TYPE: CODE-REVIEW]\n\n{content}",
-    title=f"{jira_id} - Review",
-    project=project_name
-  )
-  ```
+- **Review files** (`*-review.md`): Read each file directly.
+  The PostToolUse hook captures the full content automatically.
 
 **4e. Index configuration files**:
 
-If package.json, go.mod, Makefile, or similar exist:
+If package.json, go.mod, Makefile, or similar exist, synthesize a config summary and persist it:
+
+Write the following to `/tmp/claude-mem-{project_name}-PROJECT-CONFIG.md`:
 ```
-mcp__plugin_claude-mem_mcp-search__save_memory(
-  text=f"""[TYPE: PROJECT-CONFIG]
+# {project_name} - Project Config
+
+[TYPE: PROJECT-CONFIG]
 [PROJECT: {project_name}]
 
-# Project Configuration
-
 {config_content}
-""",
-  title=f"{project_name} - Configuration",
-  project=project_name
-)
 ```
+
+Then Read `/tmp/claude-mem-{project_name}-PROJECT-CONFIG.md`.
+The PostToolUse hook captures this automatically as a claude-mem observation.
 
 ### Step 5: Verify Integration
 

@@ -175,7 +175,7 @@ Based on RLM analysis and claude-mem history, create a plan:
 - Use same naming conventions and code structure
 - Follow dependency injection patterns found in codebase
 
-### 6. Verify and Save to Claude-Mem
+### 6. Verify and Persist to Claude-Mem
 
 ```bash
 python3 ~/.claude/rlm_scripts/rlm_repl.py exec <<'PY'
@@ -185,15 +185,25 @@ PY
 ```
 
 **Save completion to claude-mem:**
+
+Write the following to `/tmp/claude-mem-{jira_id}-IMPLEMENTATION.md`:
 ```
-mcp__plugin_claude-mem_mcp-search__save_memory(
-  text="[JIRA: {jira_id}]\n[TYPE: IMPLEMENTATION]\n\n
-Task '{task_name}' complete.\n\nPatterns used:\n{patterns}
-\n\nFiles:\n{files}",
-  title="{jira_id} - {task_name} Implementation",
-  project="{project_name}"
-)
+# {jira_id} - {task_name} Implementation
+
+[TYPE: IMPLEMENTATION]
+[PROJECT: {project_name}]
+
+Task '{task_name}' complete.
+
+Patterns used:
+{patterns}
+
+Files:
+{files}
 ```
+
+Then Read `/tmp/claude-mem-{jira_id}-IMPLEMENTATION.md`.
+The PostToolUse hook captures this automatically as a claude-mem observation.
 
 ### 7. Update Task List and Documentation
 

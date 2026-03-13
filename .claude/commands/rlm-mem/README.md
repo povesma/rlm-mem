@@ -190,11 +190,16 @@ Based on RLM paper and claude-mem benefits:
 
 2. **Claude-Mem Plugin**:
    - Source: `~/artec/claude-mem`
-   - MCP tools available:
+   - MCP tools available (read-only):
      - `mcp__plugin_claude-mem_mcp-search__search`
      - `mcp__plugin_claude-mem_mcp-search__timeline`
      - `mcp__plugin_claude-mem_mcp-search__get_observations`
-     - `mcp__plugin_claude-mem_mcp-search__save_memory`
+     - `mcp__plugin_claude-mem_mcp-search__smart_search`
+     - `mcp__plugin_claude-mem_mcp-search__smart_outline`
+     - `mcp__plugin_claude-mem_mcp-search__smart_unfold`
+   - **Writing**: Automatic via PostToolUse hook — Read a file after
+     writing it and the hook captures it as an observation. No explicit
+     save API available in v10.5.2.
 
 3. **Project Setup**:
    - Git repository

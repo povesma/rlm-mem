@@ -195,17 +195,9 @@ implement the feature.
 
 ## Final Instructions
 1. **Create the task list file** as specified above
-2. **Index in claude-mem:**
-   - Read the tasks file you just created
-   - Use MCP tool `mcp__plugin_claude-mem_mcp-search__save_memory`:
-     ```
-     mcp__plugin_claude-mem_mcp-search__save_memory(
-       text="[JIRA: <JIRA-ID>]\n[TYPE: TASK-LIST]\n\n<full task list content>",
-       title="<JIRA-ID> <feature-name> - Task List",
-       project="<project-name>"
-     )
-     ```
-   - This makes the task list searchable in future sessions
+2. **Index in claude-mem:** Read the tasks file you just created.
+   The PostToolUse hook captures the full content automatically as a
+   claude-mem observation. No explicit save step is needed.
 3. DO NOT start implementing the task list
 4. Use RLM complexity data + claude-mem velocity for realistic estimates
 5. Suggest `/rlm-mem:develop:impl` as next step
