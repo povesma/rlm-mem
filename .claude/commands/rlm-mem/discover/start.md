@@ -216,11 +216,14 @@ When referencing any library, framework, or external API — use the Context7 MC
 
 ## Docs-First Principle
 
-When the user asks to implement or change something after the session starts:
-- **Before implementing**, offer to update the relevant docs (PRD / tech-design / tasks) to reflect the change
-- This can be waived for minor changes (typos, config tweaks, small refactors)
-- The user can decline — it is not a hard rule, but must always be offered for significant changes
-- If docs are updated first, implementation follows naturally from them
+The normal flow is: PRD → tech-design → tasks → `/rlm-mem:develop:impl`. Docs should exist and be consistent with what's being built before any implementation starts.
+
+When the user asks to implement something after the session starts, check:
+- **Docs exist and are consistent** with the request → proceed directly to `/rlm-mem:develop:impl`
+- **Docs are missing, incomplete, or contradict** what's asked → stop, flag the gap, and offer to create/fix the relevant docs (PRD / tech-design / tasks) before implementing
+- **Minor changes** (typos, config tweaks, small refactors) → proceed without doc update
+
+The goal is not bureaucratic overhead — it is to catch cases where implementation would diverge from or outpace the documentation.
 
 ## Final Instructions
 
@@ -230,4 +233,4 @@ When the user asks to implement or change something after the session starts:
 4. Synthesize comprehensive summary
 5. Recommend next task (data-driven)
 6. DO NOT implement anything yet — wait for user to choose action
-7. When user requests implementation: offer docs update first (Docs-First Principle above)
+7. When user requests implementation: check docs exist and are consistent — if not, flag and fix before proceeding
