@@ -343,6 +343,10 @@ Thanks to hybrid analysis, this PRD:
 /rlm-mem:plan:tech-design
 ```
 
+## Context7
+
+When referencing any library, framework, or external API — use the Context7 MCP to look up current documentation rather than guessing. Call `mcp__context7__resolve-library-id` then `mcp__context7__get-library-docs`. Never invent API signatures or assume version-specific behaviour.
+
 ## Final Instructions
 
 1. Gather requirements from user (JIRA ID, feature name, problem)

@@ -308,6 +308,10 @@ mcp__plugin_claude-mem_mcp-search__save_memory(
 tasks/{jira-id}-{feature}/{date}-{jira-id}-{feature}-tech-design.md
 ```
 
+## Context7
+
+When referencing any library, framework, or external API — use the Context7 MCP to look up current documentation rather than guessing. Call `mcp__context7__resolve-library-id` then `mcp__context7__get-library-docs`. Never invent API signatures or assume version-specific behaviour.
+
 ## Final Instructions
 
 1. Load PRD and search past designs

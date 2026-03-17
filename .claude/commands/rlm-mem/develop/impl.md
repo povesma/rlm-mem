@@ -183,6 +183,10 @@ Task '{task_name}' complete.\n\nPatterns used:\n{patterns}
 - If parent task completed, save to claude-mem and update
   ai-docs/ if present
 
+## Context7
+
+When referencing any library, framework, or external API — use the Context7 MCP to look up current documentation rather than guessing. Call `mcp__context7__resolve-library-id` then `mcp__context7__get-library-docs`. Never invent API signatures or assume version-specific behaviour.
+
 ## Code Style
 
 - Focus on readability

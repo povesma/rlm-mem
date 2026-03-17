@@ -71,20 +71,29 @@ graph TD
 ### Nice to Have
 
 5. **Frontend Design Plugin** - For UI/UX design work
-   - Install: `/plugin marketplace add anthropics/claude-code` then `/plugin install frontend-design@claude-code-plugins`
+   - Step 1 — add to marketplace: `/plugin marketplace add anthropics/claude-code`
+   - Step 2 — install: `/plugin install frontend-design@claude-code-plugins`
 
 6. **Context7 MCP Server** - For library documentation lookups (no authentication required)
-   - Per-project: `claude mcp add --transport http context7 https://mcp.context7.com/mcp`
-   - All projects: `claude mcp add --transport http --scope user context7 https://mcp.context7.com/mcp`
+   - `claude mcp add --transport http --scope user context7 https://mcp.context7.com/mcp`
 
 ## 🚀 Installation
 
-### macOS Installation
+### macOS / Linux Installation
 
 ```bash
 # 1. Clone this repository
 cd ~/
-git clone <repository-url> rlm-mem
+git clone https://github.com/povesma/rlm-mem
+cd rlm-mem
+
+# 2. Run the install script (or follow manual steps below)
+bash install.sh
+```
+
+**Or install manually:**
+
+```bash
 cd rlm-mem
 
 # 2. Copy RLM scripts to Claude config
@@ -123,7 +132,16 @@ usage: rlm_repl [-h] [--state STATE]
 ```powershell
 # 1. Clone this repository
 cd %USERPROFILE%
-git clone <repository-url> rlm-mem
+git clone https://github.com/povesma/rlm-mem
+cd rlm-mem
+
+# 2. Run the install script (or follow manual steps below)
+powershell -ExecutionPolicy Bypass -File install.ps1
+```
+
+**Or install manually:**
+
+```powershell
 cd rlm-mem
 
 # 2. Create Claude config directories

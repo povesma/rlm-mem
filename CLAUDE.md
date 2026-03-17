@@ -97,6 +97,10 @@ README.md                       # User guide
 TROUBLESHOOTING.md              # Common errors
 ```
 
+## Documentation Rules
+
+- **Manual steps required alongside automation**: Any install script or automation must be accompanied by equivalent manual steps in the docs. If the script fails, the user must be able to complete the task by hand.
+
 ## Key Constraints
 
 - **No dependencies**: REPL uses stdlib only

@@ -210,6 +210,18 @@ Depending on what's available, provide appropriate detail:
 Ready to code! 🎉
 ```
 
+## Context7
+
+When referencing any library, framework, or external API — use the Context7 MCP to look up current documentation rather than guessing. Call `mcp__context7__resolve-library-id` then `mcp__context7__get-library-docs`. Never invent API signatures or assume version-specific behaviour.
+
+## Docs-First Principle
+
+When the user asks to implement or change something after the session starts:
+- **Before implementing**, offer to update the relevant docs (PRD / tech-design / tasks) to reflect the change
+- This can be waived for minor changes (typos, config tweaks, small refactors)
+- The user can decline — it is not a hard rule, but must always be offered for significant changes
+- If docs are updated first, implementation follows naturally from them
+
 ## Final Instructions
 
 1. Check RLM and claude-mem status
@@ -217,5 +229,5 @@ Ready to code! 🎉
 3. Analyze current state (RLM)
 4. Synthesize comprehensive summary
 5. Recommend next task (data-driven)
-6. DO NOT implement anything yet
-7. Wait for user to choose action
+6. DO NOT implement anything yet — wait for user to choose action
+7. When user requests implementation: offer docs update first (Docs-First Principle above)
