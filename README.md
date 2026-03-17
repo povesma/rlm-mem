@@ -8,7 +8,7 @@ RLM-Mem provides a complete workflow for working with large codebases (1000+ fil
 
 - **RLM (Recursive Language Model)**: Analyzes your codebase at scale, discovers patterns, estimates complexity
 - **Claude-Mem**: Provides semantic memory of past decisions, PRDs, implementations, and lessons learned
-- **8 Commands**: Cover the complete development lifecycle from planning to deployment
+- **9 Commands**: Cover the complete development lifecycle from planning to deployment
 
 ### How It Works
 
@@ -169,8 +169,8 @@ After installation, your `~/.claude/` directory will contain:
 │   ├── test-e2e-generator.md   # Playwright test code generator (requires Playwright MCP)
 │   └── test-e2e-healer.md      # Failing test debugger/repair (requires Playwright MCP)
 ├── commands/
-│   └── rlm-mem/                # All 8 rlm-mem commands
-│       ├── discover/           # init, start
+│   └── rlm-mem/                # All 9 rlm-mem commands
+│       ├── discover/           # init, start, health
 │       ├── plan/               # prd, tech-design, tasks, check
 │       └── develop/            # impl, save
 ├── hooks/
@@ -234,9 +234,10 @@ This provides:
 
 ## 📚 Available Commands
 
-### Discovery Phase (2 commands)
+### Discovery Phase (3 commands)
 - `/rlm-mem:discover:init` - Initialize RLM + claude-mem
 - `/rlm-mem:discover:start` - Start session with full context
+- `/rlm-mem:discover:health` - Verify all system dependencies are working
 
 ### Planning Phase (4 commands)
 - `/rlm-mem:plan:prd` - Generate PRD with codebase awareness
@@ -413,14 +414,11 @@ LANGUAGE_MAP = {
 
 ## 📖 Documentation
 
-- **Command Reference**: See `.claude/commands/rlm-mem/README.md`
-- **Implementation Details**: See `IMPLEMENTATION_SUMMARY.md`
 - **Troubleshooting**: See `TROUBLESHOOTING.md`
-- **Comparison with Original**: See `COMPARISON.md`
 
 ## 🔗 Related Projects
 
-- **[claude_code_RLM](https://github.com/brainqub3/claude_code_RLM)**: Original RLM for text files (our foundation)
+- **[claude_code_RLM](https://github.com/brainqub3/claude_code_RLM)**: Original RLM for text files (our foundation). RLM-Mem extends it to entire code repositories — adding multi-language indexing, git integration, and a full development workflow — and integrates claude-mem for persistent cross-session memory.
 - **[RLM Paper](https://arxiv.org/abs/2512.24601)**: Research paper on Recursive Language Models
 - **[Claude Code](https://claude.ai/download)**: Anthropic's official CLI
 
@@ -430,20 +428,20 @@ After installation, verify everything works:
 
 ```bash
 # 1. Check REPL script
-python3 ~/.claude/rlm_scripts/rlm_repl.py status
-# Expected: Error (no state yet) - this is OK
+python3 ~/.claude/rlm_scripts/rlm_repl.py --help
+# Expected: usage: rlm_repl [-h] ...
 
 # 2. Start Claude Code
 cd /path/to/test/project
 claude
 
-# 3. In Claude Code, check available commands
-# Type: /rlm-mem:
-# You should see all 8 commands in autocomplete
-
-# 4. Initialize test repo
+# 3. Initialize repo
 /rlm-mem:discover:init
 # Should index your repo and create .claude/rlm_state/
+
+# 4. Run the health check (recommended post-install verification)
+/rlm-mem:discover:health
+# All three rows should show ✅
 ```
 
 ## 🆘 Getting Help
@@ -502,7 +500,7 @@ Areas for contribution:
 
 **Built on the foundation of [claude_code_RLM](https://github.com/brainqub3/claude_code_RLM)** by [Brainqub3](https://brainqub3.com/).
 
-The original project provided the core RLM implementation for text processing. We extended it for code repositories and integrated claude-mem for historical context. See [COMPARISON.md](COMPARISON.md) for detailed differences.
+The original project provided the core RLM implementation for text processing. We extended it for code repositories and integrated claude-mem for historical context.
 
 **Thank you to:**
 - **[claude_code_RLM](https://github.com/brainqub3/claude_code_RLM)**: Original RLM implementation and inspiration

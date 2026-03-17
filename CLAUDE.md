@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 RLM-Mem is an **installation package** for Claude Code that combines:
 - **RLM**: Analyzes large codebases via persistent Python REPL
 - **Claude-Mem** (MANDATORY): Semantic memory of past decisions
-- **8 Commands**: Complete development workflow
+- **9 Commands**: Complete development workflow
 - **5 Test Subagents**: Isolated testing agents invoked via Task tool
 
 Users install to `~/.claude/` to use across all their projects.
@@ -43,7 +43,7 @@ Users install to `~/.claude/` to use across all their projects.
      claude-mem or RLM
 
 4. **Commands** (`.claude/commands/rlm-mem/`)
-   - 8 commands: discover (2), plan (4), develop (2)
+   - 9 commands: discover (3), plan (4), develop (2)
    - Each integrates RLM + claude-mem via Bash and MCP tools
 
 ### Installation Flow
@@ -90,12 +90,11 @@ Edit `rlm_repl.py` → `LANGUAGE_MAP` dict.
 │   ├── test-e2e-planner.md     # E2E planner, Playwright fork (Sonnet)
 │   ├── test-e2e-generator.md   # E2E generator, Playwright fork (Sonnet)
 │   └── test-e2e-healer.md      # E2E healer, Playwright fork (Sonnet)
-├── commands/rlm-mem/           # 8 command definitions
+├── commands/rlm-mem/           # 9 command definitions
 └── rlm_scripts/rlm_repl.py     # REPL (833 lines)
 
 README.md                       # User guide
 TROUBLESHOOTING.md              # Common errors
-COMPARISON.md                   # vs original claude_code_RLM
 ```
 
 ## Key Constraints
