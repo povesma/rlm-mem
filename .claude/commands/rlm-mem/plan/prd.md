@@ -55,31 +55,16 @@ mcp__plugin_claude-mem_mcp-search__get_observations(
 **3a. Find related existing features**:
 ```bash
 python3 ~/.claude/rlm_scripts/rlm_repl.py exec <<'PY'
-# Search for files related to this feature
-# Example: if feature is "OAuth2 auth", search for auth files
+keywords = ['feature_term', 'related_concept']  # fill with terms from the feature name and problem domain
 
-search_terms = ['{feature_keyword1}', '{feature_keyword2}']
-relevant_files = []
-
-for term in search_terms:
-    # Find files by name pattern
-    matches = [
-        path for path, meta in repo_index['files'].items()
-        if term.lower() in path.lower()
-        and not meta['is_binary']
-        and meta['lang'] in ['C++', 'C/C++', 'Python', 'TypeScript', 'JavaScript']
-    ]
-    relevant_files.extend(matches)
-
-# Remove duplicates
-relevant_files = list(set(relevant_files))[:20]
-
-# Print for analysis
-import json
-print(json.dumps({
-    'found': len(relevant_files),
-    'files': relevant_files
-}))
+relevant = []
+for kw in keywords:
+    relevant += find_symbol(kw, type='function')
+    relevant += find_files_by_pattern(f'**/*{kw}*')
+for f in list(set(relevant))[:5]:
+    relevant += get_related_files(f)
+paths = write_file_chunks(list(set(relevant))[:20], strategy='file')
+import json; print(json.dumps(paths))
 PY
 ```
 

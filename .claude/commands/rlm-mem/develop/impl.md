@@ -102,7 +102,7 @@ python3 ~/.claude/rlm_scripts/rlm_repl.py status
 **3a. Find relevant existing code:**
 ```bash
 python3 ~/.claude/rlm_scripts/rlm_repl.py exec <<'PY'
-keywords = ['keyword1', 'keyword2']  # fill based on task
+keywords = ['feature_term', 'related_concept']  # fill with terms from the task description
 
 relevant = []
 for kw in keywords:

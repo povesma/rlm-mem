@@ -39,8 +39,8 @@ for pattern in patterns:
     matches = [
         path for path, meta in repo_index['files'].items()
         if pattern in path.lower()
-        and meta['lang'] in ['C++', 'C/C++', 'TypeScript', 'Python']
         and not meta['is_binary']
+        # optionally filter by language: and meta['lang'] in ['C++', 'TypeScript', 'Python']
     ]
     arch_files.extend(matches[:5])  # Top 5 per pattern
 

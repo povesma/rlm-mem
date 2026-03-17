@@ -185,8 +185,8 @@ Depending on what's available, provide appropriate detail:
 - **Last indexed**: {timestamp}
 
 ## ✅ Completed Features
-- {Feature A} ({JIRA-ID})
-- {Feature B} ({JIRA-ID})
+- {Feature A} ({task-id})
+- {Feature B} ({task-id})
 
 ## 🏗️ Current Architecture
 {Architecture summary from claude-mem}
