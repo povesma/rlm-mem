@@ -36,11 +36,11 @@ python3 ~/.claude/rlm_scripts/rlm_repl.py status
 ### Step 2: Query Claude-Mem for Historical Context
 
 ```
-search(query="project overview goals architecture", limit=5)
-search(query="implementation completed features recent work", limit=10, orderBy="created_at DESC")
-search(query="task list TODO in progress", limit=5)
+mcp__plugin_claude-mem_mcp-search__search(query="project overview goals architecture", limit=5)
+mcp__plugin_claude-mem_mcp-search__search(query="implementation completed features recent work", limit=10, orderBy="created_at DESC")
+mcp__plugin_claude-mem_mcp-search__search(query="task list TODO in progress", limit=5)
 ```
-Fetch full observations for top results with `get_observations`.
+Fetch full observations for top results with `mcp__plugin_claude-mem_mcp-search__get_observations`.
 
 Extract: project goals, completed features, active tasks, recent decisions, known issues.
 

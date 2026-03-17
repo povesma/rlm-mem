@@ -91,7 +91,9 @@ Use rlm-subcall subagent to analyze sample files:
 - Collect findings about current capabilities
 
 **3c. Identify gaps**:
-Based on files found in 3a and rlm-subcall analysis, document what exists vs what needs to be built for this feature.
+Based on files found in 3a and rlm-subcall analysis, explicitly list:
+- **Existing**: components/patterns already present that this feature can build on
+- **Missing**: what needs to be created or extended
 
 ### Step 4: Ask Clarifying Questions (MANDATORY)
 
