@@ -91,22 +91,7 @@ Use rlm-subcall subagent to analyze sample files:
 - Collect findings about current capabilities
 
 **3c. Identify gaps**:
-```bash
-python3 ~/.claude/rlm_scripts/rlm_repl.py exec <<'PY'
-# What's missing for this feature?
-# Example: Do we have auth infrastructure? Do we have API endpoints?
-
-capabilities = {
-    'existing': [],  # What we have
-    'missing': [],   # What we need to build
-}
-
-# Based on RLM analysis and file discovery
-# Document current state
-
-print(json.dumps(capabilities, indent=2))
-PY
-```
+Based on files found in 3a and rlm-subcall analysis, document what exists vs what needs to be built for this feature.
 
 ### Step 4: Ask Clarifying Questions (MANDATORY)
 

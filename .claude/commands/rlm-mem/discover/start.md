@@ -35,73 +35,20 @@ python3 ~/.claude/rlm_scripts/rlm_repl.py status
 
 ### Step 2: Query Claude-Mem for Historical Context
 
-**2a. Search for project overview**:
 ```
-mcp__plugin_claude-mem_mcp-search__search(
-  query="project overview goals architecture",
-  project="{project_name}",
-  limit=5
-)
+search(query="project overview goals architecture", limit=5)
+search(query="implementation completed features recent work", limit=10, orderBy="created_at DESC")
+search(query="task list TODO in progress", limit=5)
 ```
+Fetch full observations for top results with `get_observations`.
 
-**2b. Search for recent work**:
-```
-mcp__plugin_claude-mem_mcp-search__search(
-  query="implementation completed features recent work",
-  project="{project_name}",
-  limit=10,
-  orderBy="created_at DESC"
-)
-```
-
-**2c. Search for active tasks**:
-```
-mcp__plugin_claude-mem_mcp-search__search(
-  query="task list TODO in progress",
-  project="{project_name}",
-  limit=5
-)
-```
-
-**2d. Get full observations for top results**:
-```
-mcp__plugin_claude-mem_mcp-search__get_observations(
-  ids=[filtered_ids_from_above]
-)
-```
-
-**Extract from claude-mem**:
-- Project goals and purpose
-- Completed features
-- Active/pending tasks
-- Recent architectural decisions
-- Known issues or tech debt
+Extract: project goals, completed features, active tasks, recent decisions, known issues.
 
 ### Step 3: Codebase Context
 
-**3a. Find project documentation:**
-
-Use the Glob tool to find documentation files:
-- Pattern: `**/README*.md`
-- Pattern: `**/CLAUDE*.md`
-
-Read top-level docs (depth 0-1) for project overview.
-
-**3b. Find active task files:**
-
-Use the Glob tool: `tasks/**/*-tasks.md`
-
-Read task files to identify current work and next tasks.
-Exclude paths containing `/archive/`.
-
-**3c. Recent git activity:**
-
-```bash
-git log --oneline -10
-```
-```bash
-git diff --stat HEAD
-```
+- Docs: Glob `**/README*.md`, `**/CLAUDE*.md` — read top-level only
+- Tasks: Glob `tasks/**/*-tasks.md` (exclude `/archive/`) — read active task files
+- Git: `git log --oneline -10` and `git diff --stat HEAD`
 
 ### Step 4: Synthesize Session Summary
 
@@ -225,63 +172,41 @@ Depending on what's available, provide appropriate detail:
 ## Example Output
 
 ```
-# 🚀 Session Started: app-astudio
+# 🚀 Session Started: {project_name}
 
 *Generated from RLM code analysis + claude-mem historical context*
 
 ## 📊 Project Overview
 
-Professional 3D scanning application for desktop platforms (Windows, macOS, Linux).
-Built with C++/Qt for performance and cross-platform support.
+{Short project description from README or claude-mem}
 
 **Repository Statistics** (RLM):
-- **Files**: 3,940 files (157.1 MB)
-- **Primary languages**:
-  - C/C++ (31.8%), C++ (22.2%), TypeScript (0.9%)
-- **Last indexed**: 2 hours ago
+- **Files**: {N} files ({size} MB) · **Languages**: {list}
+- **Last indexed**: {timestamp}
 
 ## ✅ Completed Features
-
-From claude-mem:
-- OAuth2 authentication system (AS-1234)
-- Real-time 3D preview (AS-1245)
-- Export to multiple formats (AS-1267)
+- {Feature A} ({JIRA-ID})
+- {Feature B} ({JIRA-ID})
 
 ## 🏗️ Current Architecture
-
-Clean Architecture pattern with Qt framework:
-- UI Layer: Qt QML/Widgets
-- Application Layer: C++ handlers
-- Domain Layer: Core business logic
-- Infrastructure: File I/O, networking
+{Architecture summary from claude-mem}
 
 ## 📝 Active Tasks
-
-### From Task Files (RLM):
-- AS-1289: Improve scanning accuracy (4 subtasks, 2 done)
-- AS-1290: Add cloud storage integration (planning phase)
-
-### From Memory (Claude-Mem):
-- Last worked on: AS-1289 subtask 3 (mesh optimization)
+- {TASK-1}: {description} ({N} subtasks, {M} done)
+- {TASK-2}: {description} (planning phase)
 
 ## 🔥 Recent Activity
-
-**Most Modified Files** (Past week):
-- src/scanning/mesh_processor.cpp: 5 changes
-- src/ui/preview_widget.qml: 3 changes
+- {file/path}: {N} changes
 
 ## 💡 Recommended Next Task
 
-**Suggestion**: Continue AS-1289 subtask 3 (mesh optimization)
+**Suggestion**: {task and subtask description}
 
 **Rationale**:
-- 2 of 4 subtasks complete
-- Recently modified files related to this task
-- Builds on completed work
-- High priority (from PRD)
+- {reason 1}
+- {reason 2}
 
 ## 🎯 Quick Actions
-
 Ready to code! 🎉
 ```
 

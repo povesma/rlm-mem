@@ -102,21 +102,16 @@ python3 ~/.claude/rlm_scripts/rlm_repl.py status
 **3a. Find relevant existing code:**
 ```bash
 python3 ~/.claude/rlm_scripts/rlm_repl.py exec <<'PY'
-# Search for relevant patterns based on task
+keywords = ['keyword1', 'keyword2']  # fill based on task
+
 relevant = []
-
-# Find existing code related to the task
-relevant += find_symbol('{task_keyword}', type='function')
-relevant += find_files_by_pattern('**/{pattern}*.py')
-
-# Find related files through dependencies
-for f in relevant[:5]:
+for kw in keywords:
+    relevant += find_symbol(kw, type='function')
+    relevant += find_files_by_pattern(f'**/*{kw}*')
+for f in list(set(relevant))[:5]:
     relevant += get_related_files(f)
-
-relevant = list(set(relevant))[:20]
-paths = write_file_chunks(relevant, strategy='file')
-import json
-print(json.dumps({'total': len(relevant), 'chunks': paths}))
+paths = write_file_chunks(list(set(relevant))[:20], strategy='file')
+import json; print(json.dumps(paths))
 PY
 ```
 
@@ -131,18 +126,11 @@ PY
 **3c. Find existing tests:**
 ```bash
 python3 ~/.claude/rlm_scripts/rlm_repl.py exec <<'PY'
-test_files = find_files_by_pattern('**/*test*.py')
-test_files += find_files_by_pattern('**/*.spec.ts')
-test_files += find_files_by_pattern('**/*test*.ts')
-
-related_tests = [
-    tf for tf in test_files
-    if any(r.split('/')[-1].split('.')[0] in tf
-           for r in relevant)
-]
-paths = write_file_chunks(related_tests[:10], strategy='file')
-import json
-print(json.dumps(paths))
+test_files = find_files_by_pattern('**/*test*') + find_files_by_pattern('**/*.spec.*')
+relevant_stems = {f.split('/')[-1].split('.')[0] for f in relevant}
+related = [t for t in test_files if any(s in t for s in relevant_stems)]
+paths = write_file_chunks(related[:10], strategy='file')
+import json; print(json.dumps(paths))
 PY
 ```
 
@@ -176,13 +164,6 @@ Based on RLM analysis and claude-mem history, create a plan:
 - Follow dependency injection patterns found in codebase
 
 ### 6. Verify and Save to Claude-Mem
-
-```bash
-python3 ~/.claude/rlm_scripts/rlm_repl.py exec <<'PY'
-# Verify new code follows patterns
-print("Consistency check complete")
-PY
-```
 
 **Save completion to claude-mem:**
 ```
