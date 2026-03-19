@@ -163,18 +163,10 @@ Based on RLM analysis and claude-mem history, create a plan:
 - Use same naming conventions and code structure
 - Follow dependency injection patterns found in codebase
 
-### 6. Verify and Save to Claude-Mem
+### 6. Verify and Index in Claude-Mem
 
-**Save completion to claude-mem:**
-```
-mcp__plugin_claude-mem_mcp-search__save_memory(
-  text="[JIRA: {jira_id}]\n[TYPE: IMPLEMENTATION]\n\n
-Task '{task_name}' complete.\n\nPatterns used:\n{patterns}
-\n\nFiles:\n{files}",
-  title="{jira_id} - {task_name} Implementation",
-  project="{project_name}"
-)
-```
+Read the updated tasks file — the PostToolUse hook captures it as a
+claude-mem observation automatically. No explicit save call needed.
 
 ### 7. Update Task List and Documentation
 
