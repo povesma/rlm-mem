@@ -144,59 +144,14 @@ This baseline analysis was performed by RLM indexing at {timestamp}.
 
 **4d. Index existing tasks directory** (if exists):
 
-For each file in `/tasks/`:
-- **PRD files** (`*-prd.md`):
-  ```
-  mcp__plugin_claude-mem_mcp-search__save_memory(
-    text=f"[JIRA: {jira_id}]\n[TYPE: PRD]\n\n{content}",
-    title=f"{jira_id} - PRD",
-    project=project_name
-  )
-  ```
-
-- **Tech-design files** (`*-tech-design.md`):
-  ```
-  mcp__plugin_claude-mem_mcp-search__save_memory(
-    text=f"[JIRA: {jira_id}]\n[TYPE: TECH-DESIGN]\n\n{content}",
-    title=f"{jira_id} - Tech Design",
-    project=project_name
-  )
-  ```
-
-- **Task list files** (`*-tasks.md`):
-  ```
-  mcp__plugin_claude-mem_mcp-search__save_memory(
-    text=f"[JIRA: {jira_id}]\n[TYPE: TASK-LIST]\n\n{content}",
-    title=f"{jira_id} - Tasks",
-    project=project_name
-  )
-  ```
-
-- **Review files** (`*-review.md`):
-  ```
-  mcp__plugin_claude-mem_mcp-search__save_memory(
-    text=f"[JIRA: {jira_id}]\n[TYPE: CODE-REVIEW]\n\n{content}",
-    title=f"{jira_id} - Review",
-    project=project_name
-  )
-  ```
+For each file in `/tasks/` (prd, tech-design, tasks, review files):
+Read the file — the PostToolUse hook captures it as a claude-mem
+observation automatically. No explicit save call needed.
 
 **4e. Index configuration files**:
 
 If package.json, go.mod, Makefile, or similar exist:
-```
-mcp__plugin_claude-mem_mcp-search__save_memory(
-  text=f"""[TYPE: PROJECT-CONFIG]
-[PROJECT: {project_name}]
-
-# Project Configuration
-
-{config_content}
-""",
-  title=f"{project_name} - Configuration",
-  project=project_name
-)
-```
+Read the file — the PostToolUse hook captures it automatically.
 
 ### Step 5: Verify Integration
 

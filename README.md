@@ -114,10 +114,19 @@ cp -r .claude/commands/rlm-mem ~/.claude/commands/
 # 5. Make REPL script executable
 chmod +x ~/.claude/rlm_scripts/rlm_repl.py
 
-# 6. Verify Python 3 is available
+# 6. Set up status line (optional but recommended)
+# Requires jq: brew install jq
+cp .claude/statusline.sh ~/.claude/statusline.sh
+chmod +x ~/.claude/statusline.sh
+# Then add to ~/.claude/settings.json:
+# { "statusLine": { "type": "command", "command": "~/.claude/statusline.sh" } }
+# Or ask Claude: "use the existing script at ~/.claude/statusline.sh"
+# (see §Statusline below for details)
+
+# 7. Verify Python 3 is available
 python3 --version  # Should show 3.8 or higher
 
-# 7. Test installation
+# 8. Test installation
 python3 ~/.claude/rlm_scripts/rlm_repl.py --help
 ```
 
@@ -159,11 +168,18 @@ for %f in (.claude\agents\test-*.md) do copy "%f" %USERPROFILE%\.claude\agents\
 # 5. Copy command definitions
 xcopy .claude\commands\rlm-mem %USERPROFILE%\.claude\commands\rlm-mem\ /E /I
 
-# 6. Verify Python 3 is available
+# 6. Set up status line (optional but recommended)
+copy .claude\statusline.sh %USERPROFILE%\.claude\statusline.sh
+# Then add to %USERPROFILE%\.claude\settings.json:
+# { "statusLine": { "type": "command", "command": "~/.claude/statusline.sh" } }
+# Or ask Claude: "use the existing script at ~/.claude/statusline.sh"
+# (see §Statusline below for details)
+
+# 7. Verify Python 3 is available
 python --version  # Should show 3.8 or higher
 # Or: py -3 --version
 
-# 6. Test installation
+# 8. Test installation
 python %USERPROFILE%\.claude\rlm_scripts\rlm_repl.py --help
 # Or: py -3 %USERPROFILE%\.claude\rlm_scripts\rlm_repl.py --help
 ```
@@ -193,9 +209,66 @@ After installation, your `~/.claude/` directory will contain:
 │       └── develop/            # impl, save
 ├── hooks/
 │   └── context-guard.sh        # Context window warning hook (optional)
-└── rlm_scripts/
-    └── rlm_repl.py             # Persistent REPL for RLM
+├── rlm_scripts/
+│   └── rlm_repl.py             # Persistent REPL for RLM
+└── statusline.sh               # Status line script (optional)
 ```
+
+## 📟 Statusline
+
+The included `statusline.sh` displays live session info in your IDE status bar:
+
+```
+~/AI/my-project | feature/my-branch | Sonnet 4.6 | 30K/200K $0.072 | 09:32:39
+```
+
+Shows: tilde-abbreviated path · git branch · model · used/total context · cost · time.
+
+### Prerequisites
+
+- **jq** — required for JSON parsing: `brew install jq` (macOS) / `apt install jq` (Linux)
+- **Claude Code** v1.0 or later
+
+### Setup (after install.sh)
+
+`install.sh` copies the script and optionally patches `settings.json` for you.
+If you skipped that step, choose one option:
+
+**Option A — ask Claude (recommended):**
+
+In any Claude Code session, say:
+> "use the existing script at ~/.claude/statusline.sh"
+
+Claude's built-in `statusline-setup` agent will detect the file and update
+`settings.json` automatically.
+
+> ⚠️ **Claude Code version note:** The `statusline-setup` agent is a built-in
+> Claude Code feature as of v1.0. Its behaviour may change in future Claude Code
+> releases. If it no longer works as described, fall back to Option B.
+
+**Option B — manual:**
+
+Add to `~/.claude/settings.json`:
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/statusline.sh"
+  }
+}
+```
+
+Restart Claude Code after editing `settings.json`.
+
+### Switching scripts
+
+If you have multiple statusline scripts (e.g. `statusline.sh`, `statusline-minimal.sh`),
+ask Claude in a session:
+> "switch my statusline to ~/.claude/statusline-minimal.sh"
+
+The built-in `statusline-setup` agent handles the `settings.json` update.
+
+---
 
 ## 🎮 Quick Start
 

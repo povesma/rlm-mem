@@ -219,23 +219,7 @@ As a {user type}, I want to {capability}, so that {benefit}.
 3. Run `/rlm-mem:plan:tasks` to break down into tasks
 ```
 
-### Step 6: Save PRD to Claude-Mem
-
-```
-mcp__plugin_claude-mem_mcp-search__save_memory(
-  text=f"""[JIRA: {jira_id}]
-[TYPE: PRD]
-[PROJECT: {project_name}]
-[STATUS: Draft]
-
-{full_prd_content}
-""",
-  title=f"{jira_id} - {feature_name} PRD",
-  project=project_name
-)
-```
-
-### Step 7: Save PRD to File System
+### Step 6: Save PRD to File System
 
 ```bash
 # Create task directory
@@ -245,7 +229,10 @@ mkdir -p tasks/{jira_id}-{feature_name_slug}
 # tasks/{jira_id}-{feature_name_slug}/{YYYY-MM-DD}-{jira_id}-{feature_name_slug}-prd.md
 ```
 
-### Step 8: Report Completion
+After writing, **Read the file back** — the PostToolUse hook captures it
+as a claude-mem observation automatically. No explicit save call needed.
+
+### Step 7: Report Completion
 
 ```markdown
 # ✅ PRD Created: {JIRA-ID}

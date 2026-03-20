@@ -91,7 +91,8 @@ Edit `rlm_repl.py` → `LANGUAGE_MAP` dict.
 │   ├── test-e2e-generator.md   # E2E generator, Playwright fork (Sonnet)
 │   └── test-e2e-healer.md      # E2E healer, Playwright fork (Sonnet)
 ├── commands/rlm-mem/           # 9 command definitions
-└── rlm_scripts/rlm_repl.py     # REPL (833 lines)
+├── rlm_scripts/rlm_repl.py     # REPL (833 lines)
+└── statusline.sh               # Status line script (copy to ~/.claude/)
 
 README.md                       # User guide
 TROUBLESHOOTING.md              # Common errors
