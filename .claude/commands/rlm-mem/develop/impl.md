@@ -49,9 +49,23 @@ or picking a variable name. If the change adds new behavior,
 modifies an API, or touches a file not listed in the task's
 "Relevant Files" section, it requires a doc update first.
 
-A PreToolUse hook (`docs-first-guard.sh`) enforces this outside
-`/impl`: code edits without an active `/impl` session trigger a
-user permission prompt.
+**Docs-first enforcement is semantic, not mechanical.** Before
+editing any code file, assess the context:
+- Implementing a documented task → proceed
+- Research/POC during planning → allow, note it's exploratory
+- Undocumented code change → warn the user, suggest documenting
+  first, proceed only if user confirms
+
+**Docs-after: keep documentation in sync.** After any code change
+that diverges from or extends what's documented:
+- Update the task list (mark done, add new subtasks)
+- Update tech-design if architecture/approach changed
+- Update PRD if requirements shifted
+- Update README.md if user-facing behavior changed (new commands,
+  new install steps, changed workflow)
+- Update CLAUDE.md if file structure or project constraints changed
+Do this immediately — not "later" or "in a follow-up." Stale docs
+are worse than no docs.
 
 ## Correction Capture
 
@@ -109,15 +123,6 @@ the corrected approach. No acknowledgment of the save.
 - Stop after each sub-task and wait for the user's go-ahead.
 
 ## Process
-
-### 0. Activate Implementation Session
-
-```bash
-touch ~/.claude/rlm_state/.impl-active
-```
-
-This signals the docs-first-guard hook that `/impl` is active.
-Code edits will not trigger permission prompts.
 
 ### 1. Load Context
 
@@ -235,12 +240,6 @@ mcp__plugin_claude-mem_mcp-search__search(
 - If results exist: suggest `"{N} workflow corrections captured —
   run /rlm-mem:support:improve to review and package feedback"`
 - If no results: say nothing about corrections
-
-### 9. Deactivate Implementation Session
-
-```bash
-rm -f ~/.claude/rlm_state/.impl-active
-```
 
 ## Context7
 

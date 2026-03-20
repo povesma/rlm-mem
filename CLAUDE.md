@@ -92,8 +92,7 @@ Edit `rlm_repl.py` → `LANGUAGE_MAP` dict.
 │   └── test-e2e-healer.md      # E2E healer, Playwright fork (Sonnet)
 ├── commands/rlm-mem/           # 10 command definitions
 ├── hooks/
-│   ├── context-guard.sh        # Context window warning hook
-│   └── docs-first-guard.sh     # PreToolUse: blocks undocumented edits
+│   └── context-guard.sh        # Context window warning hook
 ├── rlm_scripts/rlm_repl.py     # REPL (833 lines)
 └── statusline.sh               # Status line script (copy to ~/.claude/)
 
@@ -115,6 +114,10 @@ TROUBLESHOOTING.md              # Common errors
   repo only. Users have their own CLAUDE.md. All behavioral rules for
   the workflow must live in the command files we ship
   (`.claude/commands/rlm-mem/`), not here.
+
+## Commit Messages
+
+One line, super short. Subject only — no body, no explanation.
 
 ## Safety Rules
 

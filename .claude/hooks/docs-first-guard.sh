@@ -4,6 +4,8 @@ trap 'exit 0' ERR
 
 INPUT=$(cat)
 
+PERM_MODE=$(echo "$INPUT" | jq -r '.permission_mode // "default"') || true
+
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty') || exit 0
 [ -z "$FILE_PATH" ] && exit 0
 
@@ -24,10 +26,32 @@ if [ -f "$MARKER" ]; then
   fi
 fi
 
-jq -n '{
+WARN_MSG="⚠️ No /impl session active — this code edit is undocumented.
+
+Consider:
+  • /rlm-mem:develop:impl — start documented implementation
+  • /rlm-mem:plan:prd — create docs first
+  • Allow this edit if it is a quick fix
+
+(docs-first-guard hook — see README §Hooks)"
+
+case "$PERM_MODE" in
+  acceptEdits|dontAsk|bypassPermissions)
+    jq -n --arg msg "$WARN_MSG" '{
+      hookSpecificOutput: {
+        hookEventName: "PreToolUse",
+        permissionDecision: "allow"
+      },
+      systemMessage: $msg
+    }'
+    exit 0
+    ;;
+esac
+
+jq -n --arg reason "$WARN_MSG" '{
   hookSpecificOutput: {
     hookEventName: "PreToolUse",
     permissionDecision: "ask",
-    permissionDecisionReason: "⚠️ No /impl session active — this code edit is undocumented.\n\nConsider:\n  • /rlm-mem:develop:impl — start documented implementation\n  • /rlm-mem:plan:prd — create docs first\n  • Allow this edit if it is a quick fix\n\n(docs-first-guard hook — see README §Hooks)"
+    permissionDecisionReason: $reason
   }
 }'

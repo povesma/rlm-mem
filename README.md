@@ -115,12 +115,9 @@ cp -r .claude/commands/rlm-mem ~/.claude/commands/
 chmod +x ~/.claude/rlm_scripts/rlm_repl.py
 
 # 6. Copy hooks (optional but recommended)
-# Requires jq for the guard script
 mkdir -p ~/.claude/hooks
 cp .claude/hooks/context-guard.sh ~/.claude/hooks/
-cp .claude/hooks/docs-first-guard.sh ~/.claude/hooks/
 chmod +x ~/.claude/hooks/*.sh
-# Then register docs-first-guard in ~/.claude/settings.json (see §Hooks below)
 
 # 7. Set up status line (optional but recommended)
 # Requires jq: brew install jq
@@ -179,8 +176,6 @@ xcopy .claude\commands\rlm-mem %USERPROFILE%\.claude\commands\rlm-mem\ /E /I
 # 6. Copy hooks (optional but recommended)
 mkdir %USERPROFILE%\.claude\hooks
 copy .claude\hooks\context-guard.sh %USERPROFILE%\.claude\hooks\
-copy .claude\hooks\docs-first-guard.sh %USERPROFILE%\.claude\hooks\
-# Then register docs-first-guard in %USERPROFILE%\.claude\settings.json (see §Hooks below)
 
 # 7. Set up status line (optional but recommended)
 copy .claude\statusline.sh %USERPROFILE%\.claude\statusline.sh
@@ -223,8 +218,7 @@ After installation, your `~/.claude/` directory will contain:
 │       ├── develop/            # impl, save
 │       └── support/            # improve
 ├── hooks/
-│   ├── context-guard.sh        # Context window warning hook (optional)
-│   └── docs-first-guard.sh     # Blocks undocumented code edits (PreToolUse)
+│   └── context-guard.sh        # Context window warning hook (optional)
 ├── rlm_scripts/
 │   └── rlm_repl.py             # Persistent REPL for RLM
 └── statusline.sh               # Status line script (optional)
@@ -288,28 +282,22 @@ The built-in `statusline-setup` agent handles the `settings.json` update.
 
 ## 🛡️ Hooks
 
-### docs-first-guard
-
-Prevents undocumented code edits. A `PreToolUse` hook on `Edit|Write`
-that fires when no `/rlm-mem:develop:impl` session is active.
-
-**How it works:**
-- When Claude tries to edit a code file (`.ts`, `.py`, `.sh`, etc.)
-  outside of `/impl`, a permission prompt appears
-- Markdown, JSON, YAML, and files in `tasks/` or `.claude/` are
-  always allowed
-- During `/impl`, a marker file signals the hook to stay silent
-
-**Bypass options:**
-- Approve at the permission prompt (for quick fixes)
-- Add `"disableAllHooks": true` to `~/.claude/settings.json` (disables
-  all hooks, not just this one)
-
 ### context-guard
 
 Warns when context window usage exceeds a threshold (default: 85%)
 and the user starts new development work. See `context-guard.sh`
 source for details.
+
+### Docs-first enforcement (prompt-based)
+
+The docs-first principle is enforced through prompt instructions in
+the command files, not via a hook. Claude assesses semantic context
+before editing code files: documented task → proceed; research/POC →
+allow with note; undocumented change → warn and suggest documenting.
+
+> A PreToolUse hook approach was attempted and abandoned — it broke
+> Shift+Tab "Allow all edits" and couldn't reason about semantic
+> context. See `tasks/010-DOCS-FIRST-GUARD/` for the full history.
 
 ---
 

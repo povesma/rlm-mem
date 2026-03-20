@@ -1,6 +1,6 @@
 # 010-DOCS-FIRST-GUARD: Enforce Documentation Before Code - Tech Design
 
-**Status**: Draft
+**Status**: Revised (v2 — prompt-based enforcement)
 **PRD**: [010-DOCS-FIRST-GUARD-prd.md](2026-03-20-010-DOCS-FIRST-GUARD-prd.md)
 **Created**: 2026-03-20
 
@@ -8,19 +8,35 @@
 
 ## Overview
 
-Two components:
+### V1 (abandoned): PreToolUse hook + marker file
 
-1. **PreToolUse hook** (`docs-first-guard.sh`) — shell script that
-   fires on every `Edit|Write` call, checks an allow-list and a
-   marker file, and escalates to user permission when edits happen
-   outside `/impl`.
+The original design used two components:
 
-2. **Prompt hardening** — remove soft exceptions from `start.md` and
-   `impl.md` that let Claude skip the docs-first check; add marker
-   file creation/cleanup to `impl.md`.
+1. **PreToolUse hook** (`docs-first-guard.sh`) — shell script on
+   Edit/Write, checked allow-list + marker file, escalated to
+   user permission outside `/impl`
+2. **Prompt hardening** — removed soft exceptions from command files
 
-No new binaries, no API calls, no agent hooks. The shell script
-uses `jq` (already a dependency) and `find` for staleness checks.
+**Why V1 was abandoned** (see PRD for full rationale):
+- Hook's `"ask"` response breaks Shift+Tab "Allow all edits"
+- Skipping the hook in `acceptEdits` mode silently disables the guard
+- `systemMessage` warning in auto-edit mode goes unnoticed
+- Marker file is binary — can't reason about semantic context
+- Bash scripts can't evaluate whether an edit is contextually justified
+
+The hook file (`docs-first-guard.sh`) remains in the repo for
+reference but is **not registered** in settings.json and should
+**not be installed**.
+
+### V2 (current): Prompt-based semantic enforcement
+
+Single component: **prompt instructions in command files** that
+leverage Claude's full context to make semantic judgments about
+whether an edit is documented/justified.
+
+No hooks, no marker files, no filesystem state. Claude itself is
+the enforcement mechanism — it has the context to distinguish a
+POC during planning from undocumented production code changes.
 
 ---
 
@@ -286,24 +302,26 @@ When the user asks to implement something after the session starts, check:
 - **Minor changes** (typos, config tweaks) → proceed without doc update
 ```
 
-**New text:**
+**New text (V2):**
 ```
 When the user asks to implement something after the session starts:
 - **Docs exist and are consistent** → suggest /rlm-mem:develop:impl
 - **Docs missing or inconsistent** → stop, flag the gap, offer to
   create docs (PRD / tech-design / tasks) before implementing
+- **Research, POC, or exploration** (e.g. during PRD/tech-design) →
+  allow with a note that this is exploratory, not documented impl
+- **Minor changes** (typos, config) → proceed, no doc update needed
 
-A PreToolUse hook (docs-first-guard.sh) enforces this mechanically:
-code edits outside /impl trigger a user permission prompt. The hook
-handles minor changes — the user approves at the prompt.
+Before editing any code file, Claude must assess the semantic context:
+is this edit justified by an active task, ongoing research, or user
+approval? If not, warn and suggest documenting first.
 ```
 
 Key changes:
-- Removed "minor changes proceed without doc update" — the hook
-  handles this case (user can approve)
-- Changed "proceed to /impl" to "suggest /impl" — Claude shouldn't
-  auto-start impl, it should suggest the command
-- Added reference to the hook as the enforcement mechanism
+- Removed hook reference — enforcement is prompt-based
+- Added research/POC case — planning phases need code exploration
+- Kept minor changes exception — Claude can judge these semantically
+- Changed "proceed to /impl" to "suggest /impl"
 
 ### Changes to impl.md (lines 23-48)
 

@@ -72,27 +72,5 @@ if [ -f "$REPO_DIR/.claude/statusline.sh" ]; then
     fi
 fi
 
-# docs-first-guard hook registration
-SETTINGS="$TARGET/settings.json"
-if command -v jq >/dev/null 2>&1 && [ -f "$SETTINGS" ]; then
-    if ! jq -e '.hooks.PreToolUse[]? | select(.hooks[]?.command | test("docs-first-guard"))' \
-        "$SETTINGS" >/dev/null 2>&1; then
-        jq '.hooks.PreToolUse += [{
-            "matcher": "Edit|Write",
-            "hooks": [{
-                "type": "command",
-                "command": "bash ~/.claude/hooks/docs-first-guard.sh"
-            }]
-        }]' "$SETTINGS" > /tmp/_rlm_settings.tmp \
-            && mv /tmp/_rlm_settings.tmp "$SETTINGS"
-        echo "  docs-first-guard: registered in settings.json"
-    else
-        echo "  docs-first-guard: already registered in settings.json"
-    fi
-else
-    echo "  docs-first-guard: jq not found or settings.json missing — manual hook setup needed"
-    echo "    See README §Hooks for the PreToolUse entry to add"
-fi
-
 echo ""
 echo "Done. Run /rlm-mem:discover:start to begin a session."

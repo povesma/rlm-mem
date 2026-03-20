@@ -1,6 +1,6 @@
 # 010-DOCS-FIRST-GUARD: Enforce Documentation Before Code - PRD
 
-**Status**: Draft
+**Status**: Revised (v2 — prompt-based enforcement)
 **Created**: 2026-03-20
 **Author**: Claude (via rlm-mem analysis)
 
@@ -31,15 +31,52 @@ root causes are:
 4. **No PreToolUse hook** — no mechanical gate intercepts Edit/Write
    calls to check whether the change is backed by task docs.
 
-This feature adds a two-layer enforcement:
+### V1 approach: PreToolUse hook (attempted and abandoned)
 
-1. **Prompt hardening** — strengthen the docs-first rule in the
-   command files we ship (`start.md`, `impl.md`), remove soft
-   exceptions that undermine it
-2. **PreToolUse hook** — a shell script that fires on Edit/Write
-   calls **outside of `/impl`** sessions, checks for task docs,
-   and escalates to user permission with a message suggesting to
-   document first
+The original design used a two-layer enforcement:
+
+1. **Prompt hardening** — strengthen the docs-first rule in command
+   files, remove soft exceptions
+2. **PreToolUse hook** (`docs-first-guard.sh`) — shell script on
+   Edit/Write that checks a marker file and asks permission
+
+**Why the hook approach failed:**
+
+1. **Breaks "Allow all edits" (Shift+Tab)**: The hook's `"ask"`
+   response fires even when the user has granted blanket edit
+   permission via Shift+Tab. This makes the standard Claude Code
+   permission escalation completely non-functional.
+2. **`permission_mode` workaround is a false fix**: Reading
+   `permission_mode` from hook input and skipping the prompt in
+   `acceptEdits` mode means the guard is silently disabled exactly
+   when the user is most actively editing — defeating its purpose.
+3. **`systemMessage` is too subtle**: Returning `"allow"` with a
+   `systemMessage` warning in auto-edit mode produces a line in the
+   transcript the user will never notice during fast iteration.
+4. **Marker file is semantically wrong**: A filesystem flag for
+   "is `/impl` active?" is binary — it can't distinguish "user is
+   doing a documented task" from "user ran `/impl` an hour ago and
+   is now off-topic." The real question is semantic: "is this edit
+   justified by the current context?"
+5. **Hooks can't reason about context**: A bash script cannot
+   evaluate whether an edit is covered by existing documentation,
+   whether it's a POC during planning, or whether the user is
+   exploring. Only the LLM has that context.
+
+### V2 approach: Prompt-based semantic enforcement
+
+The enforcement moves entirely into command prompts where Claude
+has full context to make semantic judgments:
+
+- During `/impl` with documented tasks → edit freely
+- During PRD/tech-design doing research/POC → allow with a note
+- Undocumented code change in casual conversation → Claude warns
+  and suggests documenting first before proceeding
+- User explicitly approves → proceed
+
+This is softer mechanically but semantically correct. Claude can
+distinguish "temp POC in /tmp" from "rewriting production code
+without a task."
 
 ---
 

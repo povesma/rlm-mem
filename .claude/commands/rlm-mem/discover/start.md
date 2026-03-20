@@ -224,10 +224,13 @@ When the user asks to implement something after the session starts:
 - **Docs exist and are consistent** → suggest `/rlm-mem:develop:impl`
 - **Docs missing or inconsistent** → stop, flag the gap, offer to
   create docs (PRD / tech-design / tasks) before implementing
+- **Research, POC, or exploration** (e.g. during PRD/tech-design) →
+  allow with a note that this is exploratory, not documented impl
+- **Minor changes** (typos, config tweaks) → proceed without doc update
 
-A PreToolUse hook (`docs-first-guard.sh`) enforces this mechanically:
-code edits outside `/impl` trigger a user permission prompt. The hook
-handles minor changes — the user approves at the prompt.
+**Enforcement is semantic, not mechanical.** Before editing any code
+file, assess: is this edit justified by an active task, ongoing
+research, or user approval? If not, warn and suggest documenting first.
 
 ## Final Instructions
 
