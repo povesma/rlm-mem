@@ -42,10 +42,47 @@ match PRD, tech-design, and tasks. Therefore:
    - Large: update PRD + tech-design + tasks, ask user to
      confirm the doc changes before proceeding
 
-**Judgment call**: Be smart. The goal is maintaining idempotency
-for changes that matter, not creating bureaucratic overhead for
-every instruction. If updating docs costs more context/time than
-the change itself, skip the update.
+**Judgment call**: The clarification-level exception applies only to
+implementation details within an existing task subtask — such as
+choosing between two equivalent approaches, adjusting whitespace,
+or picking a variable name. If the change adds new behavior,
+modifies an API, or touches a file not listed in the task's
+"Relevant Files" section, it requires a doc update first.
+
+A PreToolUse hook (`docs-first-guard.sh`) enforces this outside
+`/impl`: code edits without an active `/impl` session trigger a
+user permission prompt.
+
+## Correction Capture
+
+When the user corrects how you work — redirecting your approach,
+fixing your code style, telling you to verify externally, or
+suggesting a workflow improvement — silently save a correction
+observation to claude-mem. Do NOT announce that you are saving it.
+Do NOT interrupt the flow.
+
+**What to capture** (behavioral corrections):
+- "Use Context7 / check the web / read the docs" → category: verification
+- "Don't add comments / wrong naming / simplify" → category: code-style
+- "Skip this step / add a check for X" → category: workflow
+- "That's over-engineered / use a simpler approach" → category: approach
+- "We should always do X before Y" → category: process
+
+**What NOT to capture** (scope/design changes):
+- "Let's do feature B instead" — scope change
+- "Make that field optional" — design decision
+- "Skip task 3" — task prioritization
+
+**How to save**:
+```
+mcp__plugin_claude-mem_mcp-search__save_memory(
+  title="Correction: {short description}",
+  text="[TYPE: CORRECTION]\n[CATEGORY: {cat}]\n[WORKFLOW-STEP: impl]\n[SEVERITY: {pattern|one-off}]\n[STATUS: pending]\n\n**What happened**: {what you did}\n**What user wanted**: {their correction}\n**Context**: {task/file being worked on}"
+)
+```
+
+Save immediately when the correction occurs. Then continue with
+the corrected approach. No acknowledgment of the save.
 
 ## Task Completion Rules
 
@@ -72,6 +109,15 @@ the change itself, skip the update.
 - Stop after each sub-task and wait for the user's go-ahead.
 
 ## Process
+
+### 0. Activate Implementation Session
+
+```bash
+touch ~/.claude/rlm_state/.impl-active
+```
+
+This signals the docs-first-guard hook that `/impl` is active.
+Code edits will not trigger permission prompts.
 
 ### 1. Load Context
 
@@ -174,6 +220,27 @@ claude-mem observation automatically. No explicit save call needed.
 - Update "Relevant Files" section in task file
 - If parent task completed, save to claude-mem and update
   ai-docs/ if present
+
+### 8. Session Wrap-Up Check
+
+Before ending the session, check for captured corrections:
+
+```
+mcp__plugin_claude-mem_mcp-search__search(
+  query="[TYPE: CORRECTION] [STATUS: pending]",
+  limit=1
+)
+```
+
+- If results exist: suggest `"{N} workflow corrections captured —
+  run /rlm-mem:support:improve to review and package feedback"`
+- If no results: say nothing about corrections
+
+### 9. Deactivate Implementation Session
+
+```bash
+rm -f ~/.claude/rlm_state/.impl-active
+```
 
 ## Context7
 

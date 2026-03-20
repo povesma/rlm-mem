@@ -22,6 +22,26 @@ left off in a fresh window.
 
 ## Under Consideration
 
+### Workflow Self-Improvement from User Corrections
+**Status**: Worth further consideration
+**Proposed**: 2026-03-20
+
+Users frequently correct Claude during sessions — rejecting approaches, redirecting
+to web/docs, changing code style. These corrections die with the session. Proposal:
+(1) teach `impl.md` to capture corrections as claude-mem observations typed
+`correction` (what happened → what user wanted → workflow step); (2) add
+`/rlm-mem:develop:review-corrections` command that queries correction history,
+groups by pattern, and lets the user curate which ones get promoted into command
+prompts. No auto-evolution — user is the curator. Industry context: Windsurf
+memories, Augment RLDB, Copilot Memory all converge on two-tier (stable rules +
+evolving memories) but none fully auto-evolve yet.
+
+Also considered: shared `_commons.md` to DRY duplicated rules across 8 commands.
+Runtime Read is unreliable (agent may skip). Build-time inject is sound but
+premature — defer until shared rules section grows.
+
+---
+
 ### Settings Profiles & Management (`/rlm-mem:config:profile`)
 **Status**: Worth further consideration
 **Proposed**: 2026-03-19

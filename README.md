@@ -8,7 +8,7 @@ RLM-Mem provides a complete workflow for working with large codebases (1000+ fil
 
 - **RLM (Recursive Language Model)**: Analyzes your codebase at scale, discovers patterns, estimates complexity
 - **Claude-Mem**: Provides semantic memory of past decisions, PRDs, implementations, and lessons learned
-- **9 Commands**: Cover the complete development lifecycle from planning to deployment
+- **10 Commands**: Cover the complete development lifecycle from planning to deployment
 
 ### How It Works
 
@@ -114,7 +114,15 @@ cp -r .claude/commands/rlm-mem ~/.claude/commands/
 # 5. Make REPL script executable
 chmod +x ~/.claude/rlm_scripts/rlm_repl.py
 
-# 6. Set up status line (optional but recommended)
+# 6. Copy hooks (optional but recommended)
+# Requires jq for the guard script
+mkdir -p ~/.claude/hooks
+cp .claude/hooks/context-guard.sh ~/.claude/hooks/
+cp .claude/hooks/docs-first-guard.sh ~/.claude/hooks/
+chmod +x ~/.claude/hooks/*.sh
+# Then register docs-first-guard in ~/.claude/settings.json (see §Hooks below)
+
+# 7. Set up status line (optional but recommended)
 # Requires jq: brew install jq
 cp .claude/statusline.sh ~/.claude/statusline.sh
 chmod +x ~/.claude/statusline.sh
@@ -123,10 +131,10 @@ chmod +x ~/.claude/statusline.sh
 # Or ask Claude: "use the existing script at ~/.claude/statusline.sh"
 # (see §Statusline below for details)
 
-# 7. Verify Python 3 is available
+# 8. Verify Python 3 is available
 python3 --version  # Should show 3.8 or higher
 
-# 8. Test installation
+# 9. Test installation
 python3 ~/.claude/rlm_scripts/rlm_repl.py --help
 ```
 
@@ -168,18 +176,24 @@ for %f in (.claude\agents\test-*.md) do copy "%f" %USERPROFILE%\.claude\agents\
 # 5. Copy command definitions
 xcopy .claude\commands\rlm-mem %USERPROFILE%\.claude\commands\rlm-mem\ /E /I
 
-# 6. Set up status line (optional but recommended)
+# 6. Copy hooks (optional but recommended)
+mkdir %USERPROFILE%\.claude\hooks
+copy .claude\hooks\context-guard.sh %USERPROFILE%\.claude\hooks\
+copy .claude\hooks\docs-first-guard.sh %USERPROFILE%\.claude\hooks\
+# Then register docs-first-guard in %USERPROFILE%\.claude\settings.json (see §Hooks below)
+
+# 7. Set up status line (optional but recommended)
 copy .claude\statusline.sh %USERPROFILE%\.claude\statusline.sh
 # Then add to %USERPROFILE%\.claude\settings.json:
 # { "statusLine": { "type": "command", "command": "~/.claude/statusline.sh" } }
 # Or ask Claude: "use the existing script at ~/.claude/statusline.sh"
 # (see §Statusline below for details)
 
-# 7. Verify Python 3 is available
+# 8. Verify Python 3 is available
 python --version  # Should show 3.8 or higher
 # Or: py -3 --version
 
-# 8. Test installation
+# 9. Test installation
 python %USERPROFILE%\.claude\rlm_scripts\rlm_repl.py --help
 # Or: py -3 %USERPROFILE%\.claude\rlm_scripts\rlm_repl.py --help
 ```
@@ -203,12 +217,14 @@ After installation, your `~/.claude/` directory will contain:
 │   ├── test-e2e-generator.md   # Playwright test code generator (requires Playwright MCP)
 │   └── test-e2e-healer.md      # Failing test debugger/repair (requires Playwright MCP)
 ├── commands/
-│   └── rlm-mem/                # All 9 rlm-mem commands
+│   └── rlm-mem/                # All 10 rlm-mem commands
 │       ├── discover/           # init, start, health
 │       ├── plan/               # prd, tech-design, tasks, check
-│       └── develop/            # impl, save
+│       ├── develop/            # impl, save
+│       └── support/            # improve
 ├── hooks/
-│   └── context-guard.sh        # Context window warning hook (optional)
+│   ├── context-guard.sh        # Context window warning hook (optional)
+│   └── docs-first-guard.sh     # Blocks undocumented code edits (PreToolUse)
 ├── rlm_scripts/
 │   └── rlm_repl.py             # Persistent REPL for RLM
 └── statusline.sh               # Status line script (optional)
@@ -267,6 +283,33 @@ ask Claude in a session:
 > "switch my statusline to ~/.claude/statusline-minimal.sh"
 
 The built-in `statusline-setup` agent handles the `settings.json` update.
+
+---
+
+## 🛡️ Hooks
+
+### docs-first-guard
+
+Prevents undocumented code edits. A `PreToolUse` hook on `Edit|Write`
+that fires when no `/rlm-mem:develop:impl` session is active.
+
+**How it works:**
+- When Claude tries to edit a code file (`.ts`, `.py`, `.sh`, etc.)
+  outside of `/impl`, a permission prompt appears
+- Markdown, JSON, YAML, and files in `tasks/` or `.claude/` are
+  always allowed
+- During `/impl`, a marker file signals the hook to stay silent
+
+**Bypass options:**
+- Approve at the permission prompt (for quick fixes)
+- Add `"disableAllHooks": true` to `~/.claude/settings.json` (disables
+  all hooks, not just this one)
+
+### context-guard
+
+Warns when context window usage exceeds a threshold (default: 85%)
+and the user starts new development work. See `context-guard.sh`
+source for details.
 
 ---
 
@@ -339,6 +382,9 @@ This provides:
 ### Development Phase (2 commands)
 - `/rlm-mem:develop:impl` - Implement following patterns
 - `/rlm-mem:develop:save` - Wrap up session, save to claude-mem
+
+### Support Phase (1 command)
+- `/rlm-mem:support:improve` - Review accumulated corrections and generate improvement proposal
 
 ## 🧪 Test Subagents
 
@@ -562,11 +608,14 @@ To update to the latest version:
 cd ~/rlm-mem  # Or wherever you cloned
 git pull
 
-# 2. Re-run installation steps
-# macOS:
+# 2. Re-run installation steps (or just run install.sh again)
+# macOS/Linux:
 cp .claude/rlm_scripts/rlm_repl.py ~/.claude/rlm_scripts/
 cp .claude/agents/rlm-subcall.md ~/.claude/agents/
+cp .claude/agents/test-*.md ~/.claude/agents/
 cp -r .claude/commands/rlm-mem ~/.claude/commands/
+cp .claude/hooks/*.sh ~/.claude/hooks/
+cp .claude/statusline.sh ~/.claude/statusline.sh
 
 # Windows: See installation section above
 ```

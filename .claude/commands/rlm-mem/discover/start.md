@@ -216,14 +216,18 @@ When referencing any library, framework, or external API — use the Context7 MC
 
 ## Docs-First Principle
 
-The normal flow is: PRD → tech-design → tasks → `/rlm-mem:develop:impl`. Docs should exist and be consistent with what's being built before any implementation starts.
+The normal flow is: PRD → tech-design → tasks → `/rlm-mem:develop:impl`.
+Docs should exist and be consistent with what's being built before any
+implementation starts.
 
-When the user asks to implement something after the session starts, check:
-- **Docs exist and are consistent** with the request → proceed directly to `/rlm-mem:develop:impl`
-- **Docs are missing, incomplete, or contradict** what's asked → stop, flag the gap, and offer to create/fix the relevant docs (PRD / tech-design / tasks) before implementing
-- **Minor changes** (typos, config tweaks, small refactors) → proceed without doc update
+When the user asks to implement something after the session starts:
+- **Docs exist and are consistent** → suggest `/rlm-mem:develop:impl`
+- **Docs missing or inconsistent** → stop, flag the gap, offer to
+  create docs (PRD / tech-design / tasks) before implementing
 
-The goal is not bureaucratic overhead — it is to catch cases where implementation would diverge from or outpace the documentation.
+A PreToolUse hook (`docs-first-guard.sh`) enforces this mechanically:
+code edits outside `/impl` trigger a user permission prompt. The hook
+handles minor changes — the user approves at the prompt.
 
 ## Final Instructions
 
