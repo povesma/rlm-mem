@@ -5,7 +5,7 @@ Create a Product Requirements Document informed by both historical context (clau
 ## When to Use
 
 - Planning a new feature
-- After `/rlm-mem:discover:start` has provided session context
+- After `/dev:start` has provided session context
 - When you need a data-driven, context-aware PRD
 
 ## What This Command Does
@@ -119,7 +119,7 @@ Create PRD combining insights + user's clarifications:
 **Status**: Draft
 **Created**: {date}
 **JIRA**: [{JIRA-ID}](https://jira.example.com/browse/{JIRA-ID})
-**Author**: Claude (via rlm-mem analysis)
+**Author**: Claude (via dev workflow analysis)
 
 ---
 
@@ -215,8 +215,8 @@ As a {user type}, I want to {capability}, so that {benefit}.
 
 **Next Steps**:
 1. Review and refine this PRD
-2. Run `/rlm-mem:plan:tech-design` to create technical design
-3. Run `/rlm-mem:plan:tasks` to break down into tasks
+2. Run `/dev:tech-design` to create technical design
+3. Run `/dev:tasks` to break down into tasks
 ```
 
 ### Step 6: Save PRD to File System
@@ -266,7 +266,7 @@ Thanks to hybrid analysis, this PRD:
 
 **Create technical design**:
 ```
-/rlm-mem:plan:tech-design
+/dev:tech-design
 ```
 
 **Or refine PRD first**:
@@ -327,7 +327,7 @@ Thanks to hybrid analysis, this PRD:
 ✅ Realistic constraints from architecture
 
 ## Next Steps
-/rlm-mem:plan:tech-design
+/dev:tech-design
 ```
 
 ## Context7
@@ -343,5 +343,5 @@ When referencing any library, framework, or external API — use the Context7 MC
 5. Synthesize PRD incorporating user's answers + RLM + claude-mem insights
 6. Save to both claude-mem and file system
 7. Report what insights were used and quality improvements
-8. Suggest `/rlm-mem:plan:tech-design` as next step
+8. Suggest `/dev:tech-design` as next step
 9. DO NOT start technical design yet, wait for user approval

@@ -289,7 +289,7 @@ Create design document:
 
 **Next Steps**:
 1. Review and approve design
-2. Run `/rlm-mem:plan:tasks` for task breakdown
+2. Run `/dev:tasks` for task breakdown
 ```
 
 ### Step 7: Save to File
@@ -314,4 +314,4 @@ When referencing any library, framework, or external API — use the Context7 MC
 5. **🚨 MANDATORY: Ask technical clarifying questions using AskUserQuestion tool**
 6. Synthesize design incorporating user's answers + RLM + claude-mem insights
 7. Save to both systems
-8. Suggest `/rlm-mem:plan:tasks` as next step
+8. Suggest `/dev:tasks` as next step

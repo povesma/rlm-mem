@@ -14,10 +14,10 @@ mkdir -p "$TARGET/agents"
 cp "$REPO_DIR/.claude/agents/"*.md "$TARGET/agents/"
 echo "  agents: $(ls "$REPO_DIR/.claude/agents/"*.md | wc -l | tr -d ' ') files"
 
-# commands/rlm-mem
-mkdir -p "$TARGET/commands/rlm-mem"
-cp -r "$REPO_DIR/.claude/commands/rlm-mem/"* "$TARGET/commands/rlm-mem/"
-echo "  commands/rlm-mem: synced"
+# commands/dev
+mkdir -p "$TARGET/commands/dev"
+cp -r "$REPO_DIR/.claude/commands/dev/"* "$TARGET/commands/dev/"
+echo "  commands/dev: synced"
 
 # hooks
 if ls "$REPO_DIR/.claude/hooks/"*.sh 2>/dev/null | grep -q .; then
@@ -72,5 +72,19 @@ if [ -f "$REPO_DIR/.claude/statusline.sh" ]; then
     fi
 fi
 
+# warn about old files
+if [ -d "$TARGET/commands/rlm-mem" ]; then
+    echo ""
+    echo "  ⚠️  Old /rlm-mem:* commands found at $TARGET/commands/rlm-mem/"
+    echo "     These are replaced by /dev:* — remove with:"
+    echo "     rm -rf $TARGET/commands/rlm-mem"
+fi
+if [ -f "$TARGET/hooks/docs-first-guard.sh" ]; then
+    echo ""
+    echo "  ⚠️  Deprecated docs-first-guard hook found."
+    echo "     This hook is no longer used — remove with:"
+    echo "     rm $TARGET/hooks/docs-first-guard.sh"
+fi
+
 echo ""
-echo "Done. Run /rlm-mem:discover:start to begin a session."
+echo "Done. Run /dev:start to begin a session."

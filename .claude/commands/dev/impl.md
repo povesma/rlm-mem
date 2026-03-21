@@ -139,7 +139,7 @@ mcp__plugin_claude-mem_mcp-search__search(
 ```bash
 python3 ~/.claude/rlm_scripts/rlm_repl.py status
 ```
-- If not initialized, suggest `/rlm-mem:discover:init`
+- If not initialized, suggest `/dev:init`
 
 ### 2. Load and Understand Current Task
 
@@ -238,7 +238,7 @@ mcp__plugin_claude-mem_mcp-search__search(
 ```
 
 - If results exist: suggest `"{N} workflow corrections captured —
-  run /rlm-mem:support:improve to review and package feedback"`
+  run /dev:improve to review and package feedback"`
 - If no results: say nothing about corrections
 
 ## Context7

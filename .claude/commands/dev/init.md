@@ -4,7 +4,7 @@ Bootstrap both RLM file indexing and claude-mem semantic memory for a project. T
 
 ## When to Use
 
-- **First time** working on a project with rlm-mem commands
+- **First time** working on a project with dev commands
 - **Migrating** from `dev/*` or `coding/*` workflows
 - **Re-indexing** after major repository changes
 - **New team member** onboarding
@@ -202,12 +202,12 @@ mcp__plugin_claude-mem_mcp-search__search(
 
 **Start your first session**:
 ```
-/rlm-mem:discover:start
+/dev:start
 ```
 
 **Or create a new feature**:
 ```
-/rlm-mem:plan:prd
+/dev:prd
 ```
 
 **Or search existing work**:
@@ -276,7 +276,7 @@ Search: "authentication" or "database schema" or "API design"
 - ✅ Project tagged: "app-astudio"
 
 ## Next Steps
-/rlm-mem:discover:start
+/dev:start
 ```
 
 ## Final Instructions
@@ -289,4 +289,4 @@ Search: "authentication" or "database schema" or "API design"
 6. Report comprehensive summary
 7. DO NOT start implementing anything
 8. DO NOT read entire source code files
-9. Suggest `/rlm-mem:discover:start` as next step
+9. Suggest `/dev:start` as next step

@@ -14,7 +14,7 @@ RLM-Mem provides a complete workflow for working with large codebases (1000+ fil
 
 ```mermaid
 graph TD
-    A[User invokes /rlm-mem command] --> B[Claude Code loads command prompt]
+    A[User invokes /dev command] --> B[Claude Code loads command prompt]
     B --> C[Opus orchestrates workflow]
 
     C --> D[RLM REPL Analysis]
@@ -109,7 +109,7 @@ cp .claude/agents/test-*.md ~/.claude/agents/
 
 # 4. Copy command definitions
 mkdir -p ~/.claude/commands
-cp -r .claude/commands/rlm-mem ~/.claude/commands/
+cp -r .claude/commands/dev ~/.claude/commands/
 
 # 5. Make REPL script executable
 chmod +x ~/.claude/rlm_scripts/rlm_repl.py
@@ -133,6 +133,11 @@ python3 --version  # Should show 3.8 or higher
 
 # 9. Test installation
 python3 ~/.claude/rlm_scripts/rlm_repl.py --help
+```
+
+**Upgrading from `/rlm-mem:*` commands?** Remove the old tree:
+```bash
+rm -rf ~/.claude/commands/rlm-mem
 ```
 
 **Expected output:**
@@ -171,7 +176,7 @@ copy .claude\agents\rlm-subcall.md %USERPROFILE%\.claude\agents\
 for %f in (.claude\agents\test-*.md) do copy "%f" %USERPROFILE%\.claude\agents\
 
 # 5. Copy command definitions
-xcopy .claude\commands\rlm-mem %USERPROFILE%\.claude\commands\rlm-mem\ /E /I
+xcopy .claude\commands\dev %USERPROFILE%\.claude\commands\dev\ /E /I
 
 # 6. Copy hooks (optional but recommended)
 mkdir %USERPROFILE%\.claude\hooks
@@ -212,11 +217,11 @@ After installation, your `~/.claude/` directory will contain:
 │   ├── test-e2e-generator.md   # Playwright test code generator (requires Playwright MCP)
 │   └── test-e2e-healer.md      # Failing test debugger/repair (requires Playwright MCP)
 ├── commands/
-│   └── rlm-mem/                # All 10 rlm-mem commands
-│       ├── discover/           # init, start, health
-│       ├── plan/               # prd, tech-design, tasks, check
-│       ├── develop/            # impl, save
-│       └── support/            # improve
+│   └── dev/                    # All 10 dev commands
+│       ├── init.md, start.md, health.md
+│       ├── prd.md, tech-design.md, tasks.md, check.md
+│       ├── impl.md
+│       └── improve.md
 ├── hooks/
 │   └── context-guard.sh        # Context window warning hook (optional)
 ├── rlm_scripts/
@@ -314,7 +319,7 @@ claude  # Start Claude Code
 
 In Claude Code:
 ```
-/rlm-mem:discover:init
+/dev:init
 ```
 
 This will:
@@ -330,7 +335,7 @@ This will:
 Every time you start working:
 
 ```
-/rlm-mem:discover:start
+/dev:start
 ```
 
 This provides:
@@ -342,41 +347,41 @@ This provides:
 ### 3. Plan a Feature
 
 ```
-/rlm-mem:plan:prd           # Create Product Requirements Document
-/rlm-mem:plan:tech-design   # Create Technical Design
-/rlm-mem:plan:tasks         # Break down into tasks
+/dev:prd           # Create Product Requirements Document
+/dev:tech-design   # Create Technical Design
+/dev:tasks         # Break down into tasks
 ```
 
 ### 4. Implement
 
 ```
-/rlm-mem:develop:impl       # Implement with pattern discovery
-/rlm-mem:develop:save       # Wrap up session, persist context
+/dev:impl       # Implement with pattern discovery
+/dev:save       # Wrap up session, persist context
 ```
 
 ## 📚 Available Commands
 
 ### Discovery Phase (3 commands)
-- `/rlm-mem:discover:init` - Initialize RLM + claude-mem
-- `/rlm-mem:discover:start` - Start session with full context
-- `/rlm-mem:discover:health` - Verify all system dependencies are working
+- `/dev:init` - Initialize RLM + claude-mem
+- `/dev:start` - Start session with full context
+- `/dev:health` - Verify all system dependencies are working
 
 ### Planning Phase (4 commands)
-- `/rlm-mem:plan:prd` - Generate PRD with codebase awareness
-- `/rlm-mem:plan:tech-design` - Design with pattern discovery
-- `/rlm-mem:plan:tasks` - Task breakdown with complexity analysis
-- `/rlm-mem:plan:check` - Verify task completion status
+- `/dev:prd` - Generate PRD with codebase awareness
+- `/dev:tech-design` - Design with pattern discovery
+- `/dev:tasks` - Task breakdown with complexity analysis
+- `/dev:check` - Verify task completion status
 
 ### Development Phase (2 commands)
-- `/rlm-mem:develop:impl` - Implement following patterns
-- `/rlm-mem:develop:save` - Wrap up session, save to claude-mem
+- `/dev:impl` - Implement following patterns
+- `/dev:save` - Wrap up session, save to claude-mem
 
 ### Support Phase (1 command)
-- `/rlm-mem:support:improve` - Review accumulated corrections and generate improvement proposal
+- `/dev:improve` - Review accumulated corrections and generate improvement proposal
 
 ## 🧪 Test Subagents
 
-RLM-Mem ships five specialized test subagents that run in isolated contexts to prevent implementation bias. Invoke them via the `Task` tool from within `/rlm-mem:develop:impl`.
+RLM-Mem ships five specialized test subagents that run in isolated contexts to prevent implementation bias. Invoke them via the `Task` tool from within `/dev:impl`.
 
 ### Agents Overview
 
@@ -441,20 +446,17 @@ Repeat for `test-e2e-generator.md` and `test-e2e-healer.md`.
 
 ### Command Tree Overview
 
-Four command trees are available after installation. Use the right one for the job:
+Three command trees are available after installation:
 
 | Tree | Memory | Code Analysis | Use When |
 |------|--------|---------------|----------|
-| `/rlm-mem` | claude-mem | RLM | **Recommended default.** Quality-first. Full history + codebase intelligence. |
+| `/dev` | claude-mem | RLM | **Recommended default.** Quality-first. Full history + codebase intelligence. |
 | `/rlm` | None | RLM | No prior session history yet, or one-off large-codebase analysis. |
 | `/coding` | claude-mem | None | Fast work on familiar code. Lightweight — no RLM overhead. |
-| `/dev` | `ai-docs/` files | None | **Deprecated.** Context stored as checked-in markdown files instead of claude-mem. Poor memory management — files go stale, require manual maintenance. |
-
-> **`/dev` is deprecated.** It stores project context in an `ai-docs/` directory of markdown files that must be manually kept up to date. `/coding` replaces it with claude-mem — zero maintenance, semantic search, persistent across sessions.
 
 ### When to Use Each Tree
 
-**Use `/rlm-mem` when:**
+**Use `/dev` when:**
 - Planning any new feature (PRD/design/tasks)
 - Working in unfamiliar parts of codebase
 - Making architectural changes
@@ -471,7 +473,7 @@ Four command trees are available after installation. Use the right one for the j
 - First session on a new large codebase (no claude-mem history yet)
 - One-off analysis task where you don't need persistent memory
 
-**Avoid `/dev`** — use `/coding` instead.
+
 
 ### Recommended Allowlist
 
@@ -488,7 +490,7 @@ git diff *
 On macOS/Linux: Claude Code settings → Permissions → Add allowed
 commands. On Windows, use the equivalent paths with backslashes.
 
-Once configured, `/rlm-mem:discover:start` runs without any
+Once configured, `/dev:start` runs without any
 interruptions.
 
 ### Performance Expectations
@@ -561,11 +563,11 @@ cd /path/to/test/project
 claude
 
 # 3. Initialize repo
-/rlm-mem:discover:init
+/dev:init
 # Should index your repo and create .claude/rlm_state/
 
 # 4. Run the health check (recommended post-install verification)
-/rlm-mem:discover:health
+/dev:health
 # All three rows should show ✅
 ```
 
@@ -583,7 +585,7 @@ See [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md) for common issues:
 ### Support
 
 1. Check [TROUBLESHOOTING.md](TROUBLESHOOTING.md) first
-2. Review command documentation in `.claude/commands/rlm-mem/`
+2. Review command documentation in `.claude/commands/dev/`
 3. Check Claude Code documentation
 4. File an issue (if this is a public repo)
 
@@ -601,7 +603,7 @@ git pull
 cp .claude/rlm_scripts/rlm_repl.py ~/.claude/rlm_scripts/
 cp .claude/agents/rlm-subcall.md ~/.claude/agents/
 cp .claude/agents/test-*.md ~/.claude/agents/
-cp -r .claude/commands/rlm-mem ~/.claude/commands/
+cp -r .claude/commands/dev ~/.claude/commands/
 cp .claude/hooks/*.sh ~/.claude/hooks/
 cp .claude/statusline.sh ~/.claude/statusline.sh
 
@@ -640,9 +642,9 @@ The original project provided the core RLM implementation for text processing. W
 
 After installation:
 
-1. ✅ Initialize your first repository: `/rlm-mem:discover:init`
-2. ✅ Start a session: `/rlm-mem:discover:start`
-3. ✅ Plan a feature: `/rlm-mem:plan:prd`
+1. ✅ Initialize your first repository: `/dev:init`
+2. ✅ Start a session: `/dev:start`
+3. ✅ Plan a feature: `/dev:prd`
 4. ✅ Experience the quality difference!
 
 **Happy coding with RLM-Mem!** 🎉

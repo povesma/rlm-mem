@@ -200,4 +200,4 @@ implement the feature.
    automatically. No explicit save call needed.
 3. DO NOT start implementing the task list
 4. Use RLM complexity data + claude-mem velocity for realistic estimates
-5. Suggest `/rlm-mem:develop:impl` as next step
+5. Suggest `/dev:impl` as next step

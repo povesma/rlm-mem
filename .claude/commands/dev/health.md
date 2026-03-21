@@ -23,9 +23,9 @@ python3 ~/.claude/rlm_scripts/rlm_repl.py status
 | Outcome | `rlm_result` |
 |---------|-------------|
 | `Total files:` > 0 | pass · notes: `"{N} files indexed"` |
-| `No such file or directory` | fail · notes: `"rlm_repl.py not found"` · fix: `"Run: bash install.sh from the rlm-mem repo root"` |
-| Error / missing state.pkl | fail · notes: `"state.pkl not found or index error"` · fix: `"Run: /rlm-mem:discover:init"` |
-| `Total files: 0` | fail · notes: `"Index is empty"` · fix: `"Run: /rlm-mem:discover:init"` |
+| `No such file or directory` | fail · notes: `"rlm_repl.py not found"` · fix: `"Run: bash install.sh from the repo root"` |
+| Error / missing state.pkl | fail · notes: `"state.pkl not found or index error"` · fix: `"Run: /dev:init"` |
+| `Total files: 0` | fail · notes: `"Index is empty"` · fix: `"Run: /dev:init"` |
 
 ### Check 2 — claude-mem Plugin
 
@@ -74,7 +74,7 @@ mcp__plugin_claude-mem_mcp-search__search(query="{token}", limit=1)
 | PostToolUse hook  | ✅/❌  | {hook_result.notes}  |
 ```
 
-- **0 failures**: print `All systems operational. Ready for /rlm-mem:discover:start`
+- **0 failures**: print `All systems operational. Ready for /dev:start`
 - **≥ 1 failure**: print `{N} issue(s) found:` then for each failed check:
   ```
   ❌ {name} — {notes}

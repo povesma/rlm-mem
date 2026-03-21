@@ -5,7 +5,7 @@ Start a coding session with comprehensive context from both RLM code analysis an
 ## When to Use
 
 - **Beginning of each coding session**
-- After `/rlm-mem:discover:init` has been run
+- After `/dev:init` has been run
 - When you need full project context
 - Resuming work after a break
 
@@ -25,7 +25,7 @@ Start a coding session with comprehensive context from both RLM code analysis an
 python3 ~/.claude/rlm_scripts/rlm_repl.py status
 ```
 
-**If not initialized**: Suggest running `/rlm-mem:discover:init` first
+**If not initialized**: Suggest running `/dev:init` first
 
 **Capture**:
 - Project path
@@ -111,8 +111,8 @@ Based on:
 
 ## 🎯 Quick Actions
 
-- **Start recommended task**: `/rlm-mem:develop:impl`
-- **Create new feature**: `/rlm-mem:plan:prd`
+- **Start recommended task**: `/dev:impl`
+- **Create new feature**: `/dev:prd`
 - **Search past work**: Ask me about anything (claude-mem enabled)
 - **Review codebase**: Ask specific questions (RLM will analyze)
 
@@ -159,7 +159,7 @@ Depending on what's available, provide appropriate detail:
    - Make it easy to start working
 
 3. **Error Handling**:
-   - If RLM not initialized: suggest `/rlm-mem:discover:init`
+   - If RLM not initialized: suggest `/dev:init`
    - If claude-mem empty: that's OK, use RLM only
    - If no tasks found: suggest creating one
 
@@ -216,12 +216,12 @@ When referencing any library, framework, or external API — use the Context7 MC
 
 ## Docs-First Principle
 
-The normal flow is: PRD → tech-design → tasks → `/rlm-mem:develop:impl`.
+The normal flow is: PRD → tech-design → tasks → `/dev:impl`.
 Docs should exist and be consistent with what's being built before any
 implementation starts.
 
 When the user asks to implement something after the session starts:
-- **Docs exist and are consistent** → suggest `/rlm-mem:develop:impl`
+- **Docs exist and are consistent** → suggest `/dev:impl`
 - **Docs missing or inconsistent** → stop, flag the gap, offer to
   create docs (PRD / tech-design / tasks) before implementing
 - **Research, POC, or exploration** (e.g. during PRD/tech-design) →
