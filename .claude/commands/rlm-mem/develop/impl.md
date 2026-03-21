@@ -42,10 +42,61 @@ match PRD, tech-design, and tasks. Therefore:
    - Large: update PRD + tech-design + tasks, ask user to
      confirm the doc changes before proceeding
 
-**Judgment call**: Be smart. The goal is maintaining idempotency
-for changes that matter, not creating bureaucratic overhead for
-every instruction. If updating docs costs more context/time than
-the change itself, skip the update.
+**Judgment call**: The clarification-level exception applies only to
+implementation details within an existing task subtask — such as
+choosing between two equivalent approaches, adjusting whitespace,
+or picking a variable name. If the change adds new behavior,
+modifies an API, or touches a file not listed in the task's
+"Relevant Files" section, it requires a doc update first.
+
+**Docs-first enforcement is semantic, not mechanical.** Before
+editing any code file, assess the context:
+- Implementing a documented task → proceed
+- Research/POC during planning → allow, note it's exploratory
+- Undocumented code change → warn the user, suggest documenting
+  first, proceed only if user confirms
+
+**Docs-after: keep documentation in sync.** After any code change
+that diverges from or extends what's documented:
+- Update the task list (mark done, add new subtasks)
+- Update tech-design if architecture/approach changed
+- Update PRD if requirements shifted
+- Update README.md if user-facing behavior changed (new commands,
+  new install steps, changed workflow)
+- Update CLAUDE.md if file structure or project constraints changed
+Do this immediately — not "later" or "in a follow-up." Stale docs
+are worse than no docs.
+
+## Correction Capture
+
+When the user corrects how you work — redirecting your approach,
+fixing your code style, telling you to verify externally, or
+suggesting a workflow improvement — silently save a correction
+observation to claude-mem. Do NOT announce that you are saving it.
+Do NOT interrupt the flow.
+
+**What to capture** (behavioral corrections):
+- "Use Context7 / check the web / read the docs" → category: verification
+- "Don't add comments / wrong naming / simplify" → category: code-style
+- "Skip this step / add a check for X" → category: workflow
+- "That's over-engineered / use a simpler approach" → category: approach
+- "We should always do X before Y" → category: process
+
+**What NOT to capture** (scope/design changes):
+- "Let's do feature B instead" — scope change
+- "Make that field optional" — design decision
+- "Skip task 3" — task prioritization
+
+**How to save**:
+```
+mcp__plugin_claude-mem_mcp-search__save_memory(
+  title="Correction: {short description}",
+  text="[TYPE: CORRECTION]\n[CATEGORY: {cat}]\n[WORKFLOW-STEP: impl]\n[SEVERITY: {pattern|one-off}]\n[STATUS: pending]\n\n**What happened**: {what you did}\n**What user wanted**: {their correction}\n**Context**: {task/file being worked on}"
+)
+```
+
+Save immediately when the correction occurs. Then continue with
+the corrected approach. No acknowledgment of the save.
 
 ## Task Completion Rules
 
@@ -163,18 +214,10 @@ Based on RLM analysis and claude-mem history, create a plan:
 - Use same naming conventions and code structure
 - Follow dependency injection patterns found in codebase
 
-### 6. Verify and Save to Claude-Mem
+### 6. Verify and Index in Claude-Mem
 
-**Save completion to claude-mem:**
-```
-mcp__plugin_claude-mem_mcp-search__save_memory(
-  text="[JIRA: {jira_id}]\n[TYPE: IMPLEMENTATION]\n\n
-Task '{task_name}' complete.\n\nPatterns used:\n{patterns}
-\n\nFiles:\n{files}",
-  title="{jira_id} - {task_name} Implementation",
-  project="{project_name}"
-)
-```
+Read the updated tasks file — the PostToolUse hook captures it as a
+claude-mem observation automatically. No explicit save call needed.
 
 ### 7. Update Task List and Documentation
 
@@ -182,6 +225,21 @@ Task '{task_name}' complete.\n\nPatterns used:\n{patterns}
 - Update "Relevant Files" section in task file
 - If parent task completed, save to claude-mem and update
   ai-docs/ if present
+
+### 8. Session Wrap-Up Check
+
+Before ending the session, check for captured corrections:
+
+```
+mcp__plugin_claude-mem_mcp-search__search(
+  query="[TYPE: CORRECTION] [STATUS: pending]",
+  limit=1
+)
+```
+
+- If results exist: suggest `"{N} workflow corrections captured —
+  run /rlm-mem:support:improve to review and package feedback"`
+- If no results: say nothing about corrections
 
 ## Context7
 

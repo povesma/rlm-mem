@@ -216,14 +216,21 @@ When referencing any library, framework, or external API — use the Context7 MC
 
 ## Docs-First Principle
 
-The normal flow is: PRD → tech-design → tasks → `/rlm-mem:develop:impl`. Docs should exist and be consistent with what's being built before any implementation starts.
+The normal flow is: PRD → tech-design → tasks → `/rlm-mem:develop:impl`.
+Docs should exist and be consistent with what's being built before any
+implementation starts.
 
-When the user asks to implement something after the session starts, check:
-- **Docs exist and are consistent** with the request → proceed directly to `/rlm-mem:develop:impl`
-- **Docs are missing, incomplete, or contradict** what's asked → stop, flag the gap, and offer to create/fix the relevant docs (PRD / tech-design / tasks) before implementing
-- **Minor changes** (typos, config tweaks, small refactors) → proceed without doc update
+When the user asks to implement something after the session starts:
+- **Docs exist and are consistent** → suggest `/rlm-mem:develop:impl`
+- **Docs missing or inconsistent** → stop, flag the gap, offer to
+  create docs (PRD / tech-design / tasks) before implementing
+- **Research, POC, or exploration** (e.g. during PRD/tech-design) →
+  allow with a note that this is exploratory, not documented impl
+- **Minor changes** (typos, config tweaks) → proceed without doc update
 
-The goal is not bureaucratic overhead — it is to catch cases where implementation would diverge from or outpace the documentation.
+**Enforcement is semantic, not mechanical.** Before editing any code
+file, assess: is this edit justified by an active task, ongoing
+research, or user approval? If not, warn and suggest documenting first.
 
 ## Final Instructions
 

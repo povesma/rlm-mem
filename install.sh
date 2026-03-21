@@ -32,5 +32,45 @@ mkdir -p "$TARGET/rlm_scripts"
 cp "$REPO_DIR/.claude/rlm_scripts/"*.py "$TARGET/rlm_scripts/"
 echo "  rlm_scripts: $(ls "$REPO_DIR/.claude/rlm_scripts/"*.py | wc -l | tr -d ' ') files"
 
+# statusline
+if [ -f "$REPO_DIR/.claude/statusline.sh" ]; then
+    cp "$REPO_DIR/.claude/statusline.sh" "$TARGET/statusline.sh"
+    chmod +x "$TARGET/statusline.sh"
+    echo "  statusline: copied to $TARGET/statusline.sh"
+
+    SETTINGS="$TARGET/settings.json"
+    if ! command -v jq >/dev/null 2>&1; then
+        echo ""
+        echo "  statusline settings.json: jq not found — manual step required"
+        echo "    Install jq:  brew install jq   (macOS)"
+        echo "                 apt install jq    (Linux)"
+        echo "    Then add to $SETTINGS:"
+        echo '    { "statusLine": { "type": "command", "command": "~/.claude/statusline.sh" } }'
+    else
+        if [ ! -f "$SETTINGS" ]; then
+            echo '{}' > "$SETTINGS"
+        fi
+        if jq -e '.statusLine' "$SETTINGS" > /dev/null 2>&1; then
+            echo "  settings.json: statusLine already configured — skipping"
+            echo "    (run /statusline-setup to switch scripts)"
+        else
+            echo ""
+            read -r -p "  Add statusLine to $SETTINGS? [y/N] " yn
+            case "$yn" in
+                [Yy]*)
+                    jq '.statusLine = {"type": "command", "command": "~/.claude/statusline.sh"}' \
+                        "$SETTINGS" > /tmp/_rlm_settings.tmp \
+                        && mv /tmp/_rlm_settings.tmp "$SETTINGS"
+                    echo "  settings.json: statusLine added"
+                    echo "  Restart Claude Code for the change to take effect."
+                    ;;
+                *)
+                    echo "  settings.json: skipped — see README §Statusline for manual step"
+                    ;;
+            esac
+        fi
+    fi
+fi
+
 echo ""
 echo "Done. Run /rlm-mem:discover:start to begin a session."

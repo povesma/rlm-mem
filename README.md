@@ -8,7 +8,7 @@ RLM-Mem provides a complete workflow for working with large codebases (1000+ fil
 
 - **RLM (Recursive Language Model)**: Analyzes your codebase at scale, discovers patterns, estimates complexity
 - **Claude-Mem**: Provides semantic memory of past decisions, PRDs, implementations, and lessons learned
-- **9 Commands**: Cover the complete development lifecycle from planning to deployment
+- **10 Commands**: Cover the complete development lifecycle from planning to deployment
 
 ### How It Works
 
@@ -114,10 +114,24 @@ cp -r .claude/commands/rlm-mem ~/.claude/commands/
 # 5. Make REPL script executable
 chmod +x ~/.claude/rlm_scripts/rlm_repl.py
 
-# 6. Verify Python 3 is available
+# 6. Copy hooks (optional but recommended)
+mkdir -p ~/.claude/hooks
+cp .claude/hooks/context-guard.sh ~/.claude/hooks/
+chmod +x ~/.claude/hooks/*.sh
+
+# 7. Set up status line (optional but recommended)
+# Requires jq: brew install jq
+cp .claude/statusline.sh ~/.claude/statusline.sh
+chmod +x ~/.claude/statusline.sh
+# Then add to ~/.claude/settings.json:
+# { "statusLine": { "type": "command", "command": "~/.claude/statusline.sh" } }
+# Or ask Claude: "use the existing script at ~/.claude/statusline.sh"
+# (see §Statusline below for details)
+
+# 8. Verify Python 3 is available
 python3 --version  # Should show 3.8 or higher
 
-# 7. Test installation
+# 9. Test installation
 python3 ~/.claude/rlm_scripts/rlm_repl.py --help
 ```
 
@@ -159,11 +173,22 @@ for %f in (.claude\agents\test-*.md) do copy "%f" %USERPROFILE%\.claude\agents\
 # 5. Copy command definitions
 xcopy .claude\commands\rlm-mem %USERPROFILE%\.claude\commands\rlm-mem\ /E /I
 
-# 6. Verify Python 3 is available
+# 6. Copy hooks (optional but recommended)
+mkdir %USERPROFILE%\.claude\hooks
+copy .claude\hooks\context-guard.sh %USERPROFILE%\.claude\hooks\
+
+# 7. Set up status line (optional but recommended)
+copy .claude\statusline.sh %USERPROFILE%\.claude\statusline.sh
+# Then add to %USERPROFILE%\.claude\settings.json:
+# { "statusLine": { "type": "command", "command": "~/.claude/statusline.sh" } }
+# Or ask Claude: "use the existing script at ~/.claude/statusline.sh"
+# (see §Statusline below for details)
+
+# 8. Verify Python 3 is available
 python --version  # Should show 3.8 or higher
 # Or: py -3 --version
 
-# 6. Test installation
+# 9. Test installation
 python %USERPROFILE%\.claude\rlm_scripts\rlm_repl.py --help
 # Or: py -3 %USERPROFILE%\.claude\rlm_scripts\rlm_repl.py --help
 ```
@@ -187,15 +212,94 @@ After installation, your `~/.claude/` directory will contain:
 │   ├── test-e2e-generator.md   # Playwright test code generator (requires Playwright MCP)
 │   └── test-e2e-healer.md      # Failing test debugger/repair (requires Playwright MCP)
 ├── commands/
-│   └── rlm-mem/                # All 9 rlm-mem commands
+│   └── rlm-mem/                # All 10 rlm-mem commands
 │       ├── discover/           # init, start, health
 │       ├── plan/               # prd, tech-design, tasks, check
-│       └── develop/            # impl, save
+│       ├── develop/            # impl, save
+│       └── support/            # improve
 ├── hooks/
 │   └── context-guard.sh        # Context window warning hook (optional)
-└── rlm_scripts/
-    └── rlm_repl.py             # Persistent REPL for RLM
+├── rlm_scripts/
+│   └── rlm_repl.py             # Persistent REPL for RLM
+└── statusline.sh               # Status line script (optional)
 ```
+
+## 📟 Statusline
+
+The included `statusline.sh` displays live session info in your IDE status bar:
+
+```
+~/AI/my-project | feature/my-branch | Sonnet 4.6 | 30K/200K $0.072 | 09:32:39
+```
+
+Shows: tilde-abbreviated path · git branch · model · used/total context · cost · time.
+
+### Prerequisites
+
+- **jq** — required for JSON parsing: `brew install jq` (macOS) / `apt install jq` (Linux)
+- **Claude Code** v1.0 or later
+
+### Setup (after install.sh)
+
+`install.sh` copies the script and optionally patches `settings.json` for you.
+If you skipped that step, choose one option:
+
+**Option A — ask Claude (recommended):**
+
+In any Claude Code session, say:
+> "use the existing script at ~/.claude/statusline.sh"
+
+Claude's built-in `statusline-setup` agent will detect the file and update
+`settings.json` automatically.
+
+> ⚠️ **Claude Code version note:** The `statusline-setup` agent is a built-in
+> Claude Code feature as of v1.0. Its behaviour may change in future Claude Code
+> releases. If it no longer works as described, fall back to Option B.
+
+**Option B — manual:**
+
+Add to `~/.claude/settings.json`:
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/statusline.sh"
+  }
+}
+```
+
+Restart Claude Code after editing `settings.json`.
+
+### Switching scripts
+
+If you have multiple statusline scripts (e.g. `statusline.sh`, `statusline-minimal.sh`),
+ask Claude in a session:
+> "switch my statusline to ~/.claude/statusline-minimal.sh"
+
+The built-in `statusline-setup` agent handles the `settings.json` update.
+
+---
+
+## 🛡️ Hooks
+
+### context-guard
+
+Warns when context window usage exceeds a threshold (default: 85%)
+and the user starts new development work. See `context-guard.sh`
+source for details.
+
+### Docs-first enforcement (prompt-based)
+
+The docs-first principle is enforced through prompt instructions in
+the command files, not via a hook. Claude assesses semantic context
+before editing code files: documented task → proceed; research/POC →
+allow with note; undocumented change → warn and suggest documenting.
+
+> A PreToolUse hook approach was attempted and abandoned — it broke
+> Shift+Tab "Allow all edits" and couldn't reason about semantic
+> context. See `tasks/010-DOCS-FIRST-GUARD/` for the full history.
+
+---
 
 ## 🎮 Quick Start
 
@@ -266,6 +370,9 @@ This provides:
 ### Development Phase (2 commands)
 - `/rlm-mem:develop:impl` - Implement following patterns
 - `/rlm-mem:develop:save` - Wrap up session, save to claude-mem
+
+### Support Phase (1 command)
+- `/rlm-mem:support:improve` - Review accumulated corrections and generate improvement proposal
 
 ## 🧪 Test Subagents
 
@@ -489,11 +596,14 @@ To update to the latest version:
 cd ~/rlm-mem  # Or wherever you cloned
 git pull
 
-# 2. Re-run installation steps
-# macOS:
+# 2. Re-run installation steps (or just run install.sh again)
+# macOS/Linux:
 cp .claude/rlm_scripts/rlm_repl.py ~/.claude/rlm_scripts/
 cp .claude/agents/rlm-subcall.md ~/.claude/agents/
+cp .claude/agents/test-*.md ~/.claude/agents/
 cp -r .claude/commands/rlm-mem ~/.claude/commands/
+cp .claude/hooks/*.sh ~/.claude/hooks/
+cp .claude/statusline.sh ~/.claude/statusline.sh
 
 # Windows: See installation section above
 ```
