@@ -72,18 +72,21 @@ if [ -f "$REPO_DIR/.claude/statusline.sh" ]; then
     fi
 fi
 
-# warn about old files
+# clean up old files
 if [ -d "$TARGET/commands/rlm-mem" ]; then
     echo ""
-    echo "  ⚠️  Old /rlm-mem:* commands found at $TARGET/commands/rlm-mem/"
-    echo "     These are replaced by /dev:* — remove with:"
-    echo "     rm -rf $TARGET/commands/rlm-mem"
+    read -r -p "  Old /rlm-mem:* commands found. Remove? [Y/n] " yn
+    case "$yn" in
+        [Nn]*) echo "  skipped — remove manually: rm -rf $TARGET/commands/rlm-mem" ;;
+        *) rm -rf "$TARGET/commands/rlm-mem"; echo "  removed $TARGET/commands/rlm-mem" ;;
+    esac
 fi
 if [ -f "$TARGET/hooks/docs-first-guard.sh" ]; then
-    echo ""
-    echo "  ⚠️  Deprecated docs-first-guard hook found."
-    echo "     This hook is no longer used — remove with:"
-    echo "     rm $TARGET/hooks/docs-first-guard.sh"
+    read -r -p "  Deprecated docs-first-guard hook found. Remove? [Y/n] " yn
+    case "$yn" in
+        [Nn]*) echo "  skipped — remove manually: rm $TARGET/hooks/docs-first-guard.sh" ;;
+        *) rm "$TARGET/hooks/docs-first-guard.sh"; echo "  removed docs-first-guard.sh" ;;
+    esac
 fi
 
 echo ""
