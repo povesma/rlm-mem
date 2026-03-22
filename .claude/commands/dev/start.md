@@ -18,7 +18,15 @@ Start a coding session with comprehensive context from both RLM code analysis an
 
 ## Process
 
+### Step 0: Load Profile
+
+Read `~/.claude/active-profile.yaml` if it exists. If not present,
+use defaults: rlm=true, memory_backend=claude-mem, docs_first=strict.
+Note the active profile name in the session summary output.
+
 ### Step 1: Verify Systems
+
+**(Skip if profile `tools.rlm` is `false`)**
 
 ```bash
 # Check RLM status
@@ -34,6 +42,8 @@ python3 ~/.claude/rlm_scripts/rlm_repl.py status
 - Last indexed timestamp
 
 ### Step 2: Query Claude-Mem for Historical Context
+
+**(Skip if profile `tools.memory_backend` is `none`)**
 
 ```
 mcp__plugin_claude-mem_mcp-search__search(query="project overview goals architecture", limit=5)

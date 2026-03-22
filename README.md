@@ -217,11 +217,15 @@ After installation, your `~/.claude/` directory will contain:
 │   ├── test-e2e-generator.md   # Playwright test code generator (requires Playwright MCP)
 │   └── test-e2e-healer.md      # Failing test debugger/repair (requires Playwright MCP)
 ├── commands/
-│   └── dev/                    # All 10 dev commands
-│       ├── init.md, start.md, health.md
+│   └── dev/                    # All 11 dev commands
+│       ├── init.md, start.md, health.md, profile.md
 │       ├── prd.md, tech-design.md, tasks.md, check.md
 │       ├── impl.md
 │       └── improve.md
+├── profiles/
+│   ├── quality.yaml            # Full workflow profile
+│   ├── fast.yaml               # Speed mode profile
+│   └── minimal.yaml            # Bare bones profile
 ├── hooks/
 │   └── context-guard.sh        # Context window warning hook (optional)
 ├── rlm_scripts/
@@ -282,6 +286,58 @@ ask Claude in a session:
 > "switch my statusline to ~/.claude/statusline-minimal.sh"
 
 The built-in `statusline-setup` agent handles the `settings.json` update.
+
+---
+
+## ⚙️ Profiles
+
+Profiles let you customize workflow behavior per project or context.
+A profile controls code style, testing approach, workflow strictness,
+RLM/memory enablement, and MCP requirements.
+
+### Built-in Profiles
+
+| Profile | Description |
+|---------|-------------|
+| `quality` | Full workflow — docs-first, TDD, RLM + claude-mem, Context7 required |
+| `fast` | Speed mode — test-after, relaxed docs, no corrections |
+| `minimal` | Bare bones — no RLM, no memory, no ceremony |
+
+### Usage
+
+```bash
+/dev:profile list           # See available profiles
+/dev:profile use quality    # Activate a profile
+/dev:profile off            # Deactivate, use defaults
+```
+
+Profiles live in `~/.claude/profiles/` (user) and `.claude/profiles/`
+(project). Project profiles override user profiles with the same name.
+
+### Creating Custom Profiles
+
+Copy a built-in profile and edit:
+```bash
+cp ~/.claude/profiles/quality.yaml ~/.claude/profiles/my-project.yaml
+# Edit my-project.yaml to match your needs
+```
+
+See `.claude/profiles/quality.yaml` for the full schema.
+
+### Current Limitations
+
+Profiles are currently **prompt-based** — they instruct `/dev:*` commands to
+skip or include steps, but do not modify system infrastructure. This means:
+
+- **claude-mem hooks** continue capturing observations even under `minimal`
+  (memory_backend: none)
+- **MCP servers** remain connected regardless of profile
+- **StatusLine** keeps running if configured
+
+**Future direction:** Make profiles deterministic by toggling hooks and MCP
+connections in `settings.json` on `profile use` / `profile off`. This would
+give profiles hard control over the runtime environment, not just behavioral
+guidance.
 
 ---
 
@@ -615,6 +671,65 @@ cp .claude/statusline.sh ~/.claude/statusline.sh
 MIT License - See LICENSE file for details
 
 **Note**: This project extends [claude_code_RLM](https://github.com/brainqub3/claude_code_RLM) which is also MIT licensed. We maintain the same open-source spirit.
+
+## 🐳 Docker Development & Testing
+
+A Docker environment is provided for testing commands in isolation.
+
+### Quick Start
+
+```bash
+docker compose build
+docker compose run --rm dev-test claude
+```
+
+### Non-Interactive Testing
+
+Run commands via `-p` flag (no MCP plugin support):
+
+```bash
+docker compose run --rm dev-test bash -c \
+  'claude -p "$(cat /workspace/.claude/commands/dev/health.md)"'
+```
+
+### Interactive Testing via tmux
+
+For full plugin support (claude-mem MCP), use tmux inside the container:
+
+```bash
+# Start container in background
+docker compose run -d --name rlm-test dev-test bash -c 'sleep infinity'
+
+# Launch Claude in a tmux session
+docker exec rlm-test tmux new-session -d -s claude 'claude'
+
+# Send commands
+docker exec rlm-test tmux send-keys -t claude '/dev:health' Enter
+
+# Read output
+docker exec rlm-test tmux capture-pane -t claude -p -S -50
+
+# Attach interactively (from your terminal)
+docker exec -it rlm-test tmux attach -t claude
+
+# Clean up
+docker rm -f rlm-test
+```
+
+### What's Included
+
+| Component | Status |
+|-----------|--------|
+| Auth persistence | Named volume (`claude-auth`) |
+| RLM REPL | Pre-installed, auto-indexes |
+| All `/dev:*` commands | Copied from repo at startup |
+| claude-mem plugin | Auto-installed on first run |
+| Chroma vector search | Disabled in container (SQLite search works) |
+
+### Known Limitations
+
+- **`-p` mode**: MCP plugin tools time out ([known issue](https://github.com/anthropics/claude-code/issues/34131)). Use tmux for full testing.
+- **Chroma disabled**: The chroma-mcp spawn storm ([#1063](https://github.com/thedotmack/claude-mem/issues/1063)) causes timeouts in containers. Does not affect native installs.
 
 ## 🤝 Contributing
 

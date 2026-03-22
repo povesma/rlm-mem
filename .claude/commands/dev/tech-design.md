@@ -10,13 +10,22 @@ Create a technical design informed by past architectural decisions (claude-mem) 
 
 ## Process
 
+### Step 0: Load Profile
+
+Read `~/.claude/active-profile.yaml` if it exists. If not present,
+use defaults: rlm=true, memory_backend=claude-mem. Skip claude-mem
+searches if `tools.memory_backend` is `none`. Skip RLM discovery
+(Step 2-3) if `tools.rlm` is `false`.
+
 ### Step 1: Load Context
 
 **Read PRD**:
 - From file: `tasks/{jira-id}-{feature}/...-prd.md`
 - Or search claude-mem for recent PRD
+  (skip if profile `tools.memory_backend` is `none`)
 
-**Search past tech designs** (claude-mem):
+**Search past tech designs** (claude-mem)
+(skip if profile `tools.memory_backend` is `none`):
 ```
 mcp__plugin_claude-mem_mcp-search__search(
   query="{feature_keywords} architecture design patterns technical",

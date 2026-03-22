@@ -90,8 +90,10 @@ Edit `rlm_repl.py` → `LANGUAGE_MAP` dict.
 │   ├── test-e2e-planner.md     # E2E planner, Playwright fork (Sonnet)
 │   ├── test-e2e-generator.md   # E2E generator, Playwright fork (Sonnet)
 │   └── test-e2e-healer.md      # E2E healer, Playwright fork (Sonnet)
-├── commands/dev/               # 10 command definitions (flat)
+├── commands/dev/               # 11 command definitions (flat)
 ├── commands-archive/dev/      # deprecated dev tree (reference only)
+├── profiles/                   # workflow configuration profiles
+│   ├── quality.yaml, fast.yaml, minimal.yaml
 ├── hooks/
 │   └── context-guard.sh        # Context window warning hook
 ├── rlm_scripts/rlm_repl.py     # REPL (833 lines)

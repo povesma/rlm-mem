@@ -11,10 +11,16 @@ operational. Renders a combined summary table with fix instructions.
 
 ## Process
 
-**Run all three checks even if earlier ones fail. Collect results first,
+**Read `~/.claude/active-profile.yaml` if it exists.** Use its values
+to determine which checks to run and which MCPs to validate.
+If no profile, use defaults (rlm=true, memory_backend=claude-mem).
+
+**Run all checks even if earlier ones fail. Collect results first,
 then render the combined summary at the end.**
 
 ### Check 1 — RLM State
+
+**(Skip if profile `tools.rlm` is `false` — mark as "skipped")**
 
 ```bash
 python3 ~/.claude/rlm_scripts/rlm_repl.py status
@@ -28,6 +34,8 @@ python3 ~/.claude/rlm_scripts/rlm_repl.py status
 | `Total files: 0` | fail · notes: `"Index is empty"` · fix: `"Run: /dev:init"` |
 
 ### Check 2 — claude-mem Plugin
+
+**(Skip if profile `tools.memory_backend` is `none` — mark as "skipped")**
 
 ```
 mcp__plugin_claude-mem_mcp-search__search(query="health check probe", limit=1)
@@ -61,6 +69,25 @@ mcp__plugin_claude-mem_mcp-search__search(query="{token}", limit=1)
 
 - **Pass** (≥ 1 result): notes `"Observation captured"`
 - **Fail** (0 results): notes `"Observation not found (may be timing or hook misconfigured)"` · fix: `"Verify PostToolUse hook in ~/.claude/settings.json — see README.md §Hook Setup"`
+
+### Check 4 — Profile MCP Requirements
+
+**(Skip if no active profile or profile has empty `mcps` lists)**
+
+Read `mcps.required` and `mcps.optional` from the active profile.
+For each required MCP, attempt a basic tool call to verify it's
+responsive:
+- `context7`: call `mcp__context7__resolve-library-id` with a
+  known library
+- `playwright`: call `mcp__playwright__browser_snapshot` or similar
+- Other MCPs: attempt any available tool from that server
+
+| MCP | Required? | Status | Notes |
+|-----|-----------|--------|-------|
+| {name} | required/optional | ✅/❌/⚠️ | {result} |
+
+- Required MCPs that fail → ❌ with fix suggestion
+- Optional MCPs that fail → ⚠️ warning only
 
 ### Render Summary
 

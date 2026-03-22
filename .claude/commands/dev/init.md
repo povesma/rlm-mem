@@ -28,9 +28,16 @@ Bootstrap both RLM file indexing and claude-mem semantic memory for a project. T
 
 ## Process
 
+### Step 0: Load Profile
+
+Read `~/.claude/active-profile.yaml` if it exists. If not present,
+use defaults: rlm=true, memory_backend=claude-mem. Skip RLM init
+steps below if `tools.rlm` is `false`. Skip claude-mem bootstrap
+if `tools.memory_backend` is `none`.
+
 ### Step 1: Verify Prerequisites
 
-Check that both systems are available:
+Check that both systems are available (skip checks for disabled tools):
 ```bash
 # Check RLM
 python3 ~/.claude/rlm_scripts/rlm_repl.py --help

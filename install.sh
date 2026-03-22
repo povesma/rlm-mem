@@ -19,6 +19,11 @@ mkdir -p "$TARGET/commands/dev"
 cp -r "$REPO_DIR/.claude/commands/dev/"* "$TARGET/commands/dev/"
 echo "  commands/dev: synced"
 
+# profiles
+mkdir -p "$TARGET/profiles"
+cp "$REPO_DIR/.claude/profiles/"*.yaml "$TARGET/profiles/"
+echo "  profiles: $(ls "$REPO_DIR/.claude/profiles/"*.yaml | wc -l | tr -d ' ') files"
+
 # hooks
 if ls "$REPO_DIR/.claude/hooks/"*.sh 2>/dev/null | grep -q .; then
     mkdir -p "$TARGET/hooks"

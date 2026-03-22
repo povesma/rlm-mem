@@ -17,6 +17,13 @@ Create a Product Requirements Document informed by both historical context (clau
 
 ## Process
 
+### Step 0: Load Profile
+
+Read `~/.claude/active-profile.yaml` if it exists. If not present,
+use defaults: rlm=true, memory_backend=claude-mem. Skip claude-mem
+steps (Step 2) if `tools.memory_backend` is `none`. Skip RLM
+analysis (Step 3) if `tools.rlm` is `false`.
+
 ### Step 1: Gather Requirements from User
 
 Ask the user for feature details:

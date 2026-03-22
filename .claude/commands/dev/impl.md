@@ -49,12 +49,12 @@ or picking a variable name. If the change adds new behavior,
 modifies an API, or touches a file not listed in the task's
 "Relevant Files" section, it requires a doc update first.
 
-**Docs-first enforcement is semantic, not mechanical.** Before
-editing any code file, assess the context:
-- Implementing a documented task → proceed
-- Research/POC during planning → allow, note it's exploratory
-- Undocumented code change → warn the user, suggest documenting
-  first, proceed only if user confirms
+**Docs-first enforcement** (per profile `rules.workflow.docs_first`):
+- If `strict`: assess context before editing any code file —
+  documented task → proceed; research/POC → allow with note;
+  undocumented → warn, suggest documenting first
+- If `relaxed`: warn on undocumented changes but proceed
+- If `off`: no docs-first checks
 
 **Docs-after: keep documentation in sync.** After any code change
 that diverges from or extends what's documented:
@@ -68,6 +68,9 @@ Do this immediately — not "later" or "in a follow-up." Stale docs
 are worse than no docs.
 
 ## Correction Capture
+
+**Skip this section entirely if profile
+`rules.workflow.correction_capture` is `false`.**
 
 When the user corrects how you work — redirecting your approach,
 fixing your code style, telling you to verify externally, or
@@ -124,9 +127,24 @@ the corrected approach. No acknowledgment of the save.
 
 ## Process
 
+### 0. Load Profile
+
+Read `~/.claude/active-profile.yaml` if it exists. If the file
+does not exist, use these defaults:
+- `rules.code_style`: line_length=120, comments=minimal,
+  naming_convention=handler
+- `rules.testing`: approach=tdd, scope=[unit, integration],
+  subagents=[test-backend, test-review]
+- `rules.workflow`: docs_first=strict, correction_capture=true,
+  scope_drift=warn
+- `tools`: rlm=true, memory_backend=claude-mem
+
+Apply the loaded values to all "per profile" references below.
+
 ### 1. Load Context
 
-**Search claude-mem for similar implementations:**
+**Search claude-mem for similar implementations**
+(skip if profile `tools.memory_backend` is `none`):
 ```
 mcp__plugin_claude-mem_mcp-search__search(
   query="{task_keywords} implementation pattern",
@@ -135,7 +153,8 @@ mcp__plugin_claude-mem_mcp-search__search(
 )
 ```
 
-**Initialize RLM:**
+**Initialize RLM**
+(skip if profile `tools.rlm` is `false`):
 ```bash
 python3 ~/.claude/rlm_scripts/rlm_repl.py status
 ```
@@ -149,6 +168,8 @@ python3 ~/.claude/rlm_scripts/rlm_repl.py status
 - Extract requirements and acceptance criteria
 
 ### 3. RLM-Powered Context Discovery
+
+**Skip this entire step if profile `tools.rlm` is `false`.**
 
 **3a. Find relevant existing code:**
 ```bash
@@ -247,23 +268,36 @@ When referencing any library, framework, or external API — use the Context7 MC
 
 ## Code Style
 
+**Per profile `rules.code_style`** (defaults shown):
+
 - Focus on readability
-- Try and keep to 120 character row length
+- Line length: per profile `line_length` (default: 120)
 - Trim empty characters in line ends
 - IMPORTANT: Always end files with an empty line
-- **Avoid comments:** Write self-documenting code with clear
-  variable/function names. Only add comments for complex business
-  logic or non-obvious design decisions.
-- **Architecture Terminology:** Use "handler" instead of
-  "usecase" for application layer components
+- **Comments policy** per profile `comments`:
+  - `minimal` (default): Avoid comments. Write self-documenting code.
+    Only add comments for complex business logic.
+  - `allowed`: Add comments where helpful for clarity.
+  - `none`: No comment policy enforced.
+- **Naming convention** per profile `naming_convention`:
+  - `handler` (default): Use "handler" for application layer components
+  - `none`: No naming convention enforced
 
-## Testing Guidelines (TDD)
+## Testing Guidelines
 
+**Per profile `rules.testing`** (defaults shown):
+
+- **Approach** per profile `approach`:
+  - `tdd` (default): Write tests first, then implement
+  - `test-after`: Implement first, write tests after
+  - `none`: No testing requirements
 - **Test External Interface Only:** Public APIs, exported
   functions, external interfaces — never internal implementation
 - **Test Functionality, Not Implementation:** What the code does,
   not how
 - **Focus on Module Contracts:** Inputs, outputs, side effects,
   error conditions
-- **Test First:** Write test before implementing functionality
+- **Subagents**: invoke agents listed in profile `subagents`
+  (default: [test-backend, test-review]). Empty list = no subagents.
 - Follow testing patterns discovered via RLM analysis
+  (skip if RLM disabled)
